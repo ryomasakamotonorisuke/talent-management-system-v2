@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createSupabaseClient } from '@/lib/supabase/client'
 
-export default function CertificateUploadPage() {
+function CertificateUploadForm() {
   const router = useRouter()
   const params = useSearchParams()
   const traineeIdParam = params.get('traineeId') || ''
@@ -158,6 +158,23 @@ export default function CertificateUploadPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function CertificateUploadPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 py-8 px-4">
+        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <span className="ml-3 text-gray-600">読み込み中...</span>
+          </div>
+        </div>
+      </div>
+    }>
+      <CertificateUploadForm />
+    </Suspense>
   )
 }
 

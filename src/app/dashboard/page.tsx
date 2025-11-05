@@ -6,6 +6,9 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { Trainee, Certificate } from '@/types'
 
+// 動的ルートとして設定（静的生成を無効化）
+export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
   try {
     const supabase = await createSupabaseServerClient()

@@ -2,6 +2,9 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdmin } from '@/lib/supabase/client'
 import { NextResponse } from 'next/server'
 
+// 動的ルートとして設定（静的生成を無効化）
+export const dynamic = 'force-dynamic'
+
 /**
  * REQ-007: 在留期限通知（1ヶ月前）
  * REQ-008: 在留期限通知（8ヶ月前）
