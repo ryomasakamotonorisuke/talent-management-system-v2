@@ -1,218 +1,154 @@
-'use client';
+import { createSupabaseServerClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import DashboardLayout from '@/components/layout/DashboardLayout'
+import DashboardStats from '@/components/dashboard/DashboardStats'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
+import { Trainee, Certificate } from '@/types'
 
-import { useEffect, useState } from 'react';
-import { useAuth } from '@/contexts/SupabaseAuthContext';
+export default async function DashboardPage() {
+  try {
+    const supabase = await createSupabaseServerClient()
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
 
-interface Trainee {
-  id: string;
-  trainee_id: string;
-  first_name: string;
-  last_name: string;
-  nationality: string;
-  department: string;
-  visa_expiry_date: string;
-  created_at: string;
-}
-
-interface Stats {
-  totalTrainees: number;
-  nationalityStats: Array<{
-    nationality: string;
-    count: number;
-  }>;
-}
-
-export default function DashboardPage() {
-  const { user, loading } = useAuth();
-  const [trainees, setTrainees] = useState<Trainee[]>([]);
-  const [stats, setStats] = useState<Stats>({ totalTrainees: 0, nationalityStats: [] });
-  const [dataLoading, setDataLoading] = useState(true);
-
-  useEffect(() => {
-    if (user) {
-      fetchData();
+    if (!session) {
+      redirect('/login')
     }
-  }, [user]);
 
-  const fetchData = async () => {
-    try {
-      // 実習生データの取得
-      const traineesResponse = await fetch('/api/supabase?action=get-trainees');
-      const traineesData = await traineesResponse.json();
-      setTrainees(traineesData.trainees || []);
+    const userDisplayName = session.user.email
 
-      // 統計データの取得
-      const statsResponse = await fetch('/api/supabase?action=get-stats');
-      const statsData = await statsResponse.json();
-      setStats(statsData);
+    // 実習生データを取得
+    const { data: trainees = [], error: traineesError } = await supabase
+      .from('trainees')
+      .select('*')
+      .order('created_at', { ascending: false })
 
-    } catch (error) {
-      console.error('データ取得エラー:', error);
-    } finally {
-      setDataLoading(false);
+    // 資格証明書データを取得
+    const { data: certificates = [], error: certificatesError } = await supabase
+      .from('certificates')
+      .select('*')
+      .eq('is_active', true)
+
+    // エラーログ出力
+    if (traineesError) {
+      console.error('Trainees fetch error:', traineesError)
     }
-  };
+    if (certificatesError) {
+      console.error('Certificates fetch error:', certificatesError)
+    }
 
-  if (loading || dataLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-red-600">ログインが必要です</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* ページヘッダー */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">ダッシュボード</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Supabase認証でログイン中: {user.email}
-        </p>
-      </div>
-
-      {/* 統計カード */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="card">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="h-8 w-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                <span className="text-blue-600 font-bold">👥</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">実習生総数</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalTrainees}</p>
-            </div>
+      <DashboardLayout userEmail={userDisplayName || undefined}>
+        <div className="space-y-8 animate-fade-in">
+          {/* ページヘッダー */}
+          <div className="space-y-2">
+            <h1 className="text-4xl font-bold gradient-text">ダッシュボード</h1>
+            <p className="text-primary-600">システム全体の統計とアラートを確認できます</p>
           </div>
-        </div>
 
-        <div className="card">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="h-8 w-8 bg-green-100 rounded-lg flex items-center justify-center">
-                <span className="text-green-600 font-bold">🌍</span>
-              </div>
+          {/* エラー表示 */}
+          {(traineesError || certificatesError) && (
+            <div className="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 rounded-lg">
+              <p className="font-medium">データ取得時にエラーが発生しました</p>
+              {traineesError && <p className="text-sm mt-1">実習生データ: {traineesError.message}</p>}
+              {certificatesError && <p className="text-sm mt-1">証明書データ: {certificatesError.message}</p>}
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">国籍数</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.nationalityStats.length}</p>
-            </div>
-          </div>
-        </div>
+          )}
 
-        <div className="card">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="h-8 w-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                <span className="text-purple-600 font-bold">🏢</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">部署数</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {new Set(trainees.map(t => t.department)).size}
-              </p>
-            </div>
-          </div>
-        </div>
+          {/* 統計コンポーネント */}
+          <DashboardStats 
+            trainees={(trainees || []) as Trainee[]} 
+            certificates={(certificates || []) as Certificate[]} 
+          />
 
-        <div className="card">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="h-8 w-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <span className="text-yellow-600 font-bold">📊</span>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-500">データ更新</p>
-              <p className="text-sm font-bold text-gray-900">リアルタイム</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 国籍別統計 */}
-      {stats.nationalityStats.length > 0 && (
-        <div className="card">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">国籍別統計</h3>
-          <div className="space-y-3">
-            {stats.nationalityStats.map((stat) => (
-              <div key={stat.nationality} className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">{stat.nationality}</span>
-                <div className="flex items-center">
-                  <div className="w-20 bg-gray-200 rounded-full h-2 mr-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full"
-                      style={{
-                        width: `${(stat.count / stats.totalTrainees) * 100}%`
-                      }}
-                    ></div>
+          {/* クイックアクセス */}
+          <div className="space-y-4">
+            <h2 className="text-2xl font-semibold text-primary-900">クイックアクセス</h2>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <Card hover glow className="p-6 group">
+                <Button
+                  href="/dashboard/trainees"
+                  variant="ghost"
+                  className="w-full justify-start h-auto p-0"
+                >
+                  <div className="flex items-center space-x-4 w-full">
+                    <div className="bg-primary-100 rounded-xl p-4 group-hover:bg-primary-200 transition-colors duration-300">
+                      <svg className="w-8 h-8 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-primary-900 group-hover:text-primary-600 transition-colors">
+                        実習生管理
+                      </h3>
+                      <p className="text-sm text-primary-500 mt-1">実習生一覧・登録・編集</p>
+                    </div>
                   </div>
-                  <span className="text-sm font-medium text-gray-900">{stat.count}</span>
-                </div>
-              </div>
-            ))}
+                </Button>
+              </Card>
+
+              <Card hover glow className="p-6 group">
+                <Button
+                  href="/dashboard/certificates"
+                  variant="ghost"
+                  className="w-full justify-start h-auto p-0"
+                >
+                  <div className="flex items-center space-x-4 w-full">
+                    <div className="bg-accent-100 rounded-xl p-4 group-hover:bg-accent-200 transition-colors duration-300">
+                      <svg className="w-8 h-8 text-accent-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-primary-900 group-hover:text-accent-600 transition-colors">
+                        資格管理
+                      </h3>
+                      <p className="text-sm text-primary-500 mt-1">証明書・資格の管理</p>
+                    </div>
+                  </div>
+                </Button>
+              </Card>
+
+              <Card hover glow className="p-6 group">
+                <Button
+                  href="/dashboard/evaluations"
+                  variant="ghost"
+                  className="w-full justify-start h-auto p-0"
+                >
+                  <div className="flex items-center space-x-4 w-full">
+                    <div className="bg-purple-100 rounded-xl p-4 group-hover:bg-purple-200 transition-colors duration-300">
+                      <svg className="w-8 h-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-primary-900 group-hover:text-purple-600 transition-colors">
+                        スキル評価
+                      </h3>
+                      <p className="text-sm text-primary-500 mt-1">スキル評価・進捗管理</p>
+                    </div>
+                  </div>
+                </Button>
+              </Card>
+            </div>
           </div>
         </div>
-      )}
-
-      {/* 実習生一覧 */}
-      <div className="card">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">実習生一覧</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  実習生ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  氏名
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  国籍
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  部署
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  在留期限
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {trainees.map((trainee) => (
-                <tr key={trainee.id}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {trainee.trainee_id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {trainee.last_name} {trainee.first_name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {trainee.nationality}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {trainee.department}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {new Date(trainee.visa_expiry_date).toLocaleDateString('ja-JP')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      </DashboardLayout>
+    )
+  } catch (error: any) {
+    console.error('Dashboard page error:', error)
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-50">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-red-600 mb-4">エラーが発生しました</h1>
+          <p className="text-primary-600 mb-4">{error?.message || '不明なエラー'}</p>
+          <a href="/login" className="text-primary-600 hover:text-primary-800 underline">
+            ログインページに戻る
+          </a>
         </div>
       </div>
-    </div>
-  );
+    )
+  }
 }

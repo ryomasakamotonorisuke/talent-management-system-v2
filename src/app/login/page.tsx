@@ -1,103 +1,136 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import { useAuth } from '@/contexts/SupabaseAuthContext';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createSupabaseClient } from '@/lib/supabase/client'
+import Card from '@/components/ui/Card'
+import Input from '@/components/ui/Input'
+import Button from '@/components/ui/Button'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { signIn } = useAuth();
-  const router = useRouter();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+  const supabase = createSupabaseClient()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
 
     try {
-      const { error } = await signIn(email, password);
-      
-      if (error) {
-        setError(error.message);
-      } else {
-        // 認証成功時はAuthProviderで自動的にリダイレクトされる
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (authError) {
+        console.error('Login error details:', {
+          message: authError.message,
+          status: authError.status,
+          email: email,
+          error: authError
+        })
+        let errorMessage = 'ログインに失敗しました'
+        
+        if (authError.message?.includes('Invalid login credentials')) {
+          errorMessage = 'メールアドレスまたはパスワードが正しくありません。\n\n以下の点をご確認ください:\n1. Supabaseダッシュボードでユーザーが作成されているか\n2. 「Auto Confirm User」がONになっているか\n3. メールアドレスとパスワードが正確に入力されているか'
+        } else if (authError.message?.includes('Email not confirmed')) {
+          errorMessage = 'メールアドレスが確認されていません。Supabaseダッシュボードで「Auto Confirm User」をONにしてください'
+        } else if (authError.message?.includes('User not found')) {
+          errorMessage = 'ユーザーが見つかりません。Supabaseダッシュボードでユーザーを作成してください'
+        } else {
+          errorMessage = authError.message || 'ログインに失敗しました'
+        }
+        
+        setError(errorMessage)
+        return
       }
-    } catch (err) {
-      setError('ログインに失敗しました');
+
+      if (data.user) {
+        router.push('/dashboard')
+        router.refresh()
+      }
+    } catch (err: any) {
+      console.error('Unexpected error:', err)
+      setError(err.message || 'ログインに失敗しました')
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div className="bg-white py-8 px-6 shadow-xl rounded-lg">
-          <div className="text-center">
-            <h2 className="text-3xl font-extrabold text-gray-900">
-              タレントマネジメントシステム
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Supabase認証でログイン
-            </p>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-50 particle-bg py-12 px-4">
+      <div className="max-w-md w-full space-y-8 animate-fade-in-up">
+        {/* ロゴ・タイトルエリア */}
+        <div className="text-center">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary-500 to-primary-700 rounded-2xl shadow-xl mb-6 animate-float">
+            <svg className="w-12 h-12 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
           </div>
+          <h2 className="text-3xl font-bold gradient-text">
+            海外技能実習生管理システム
+          </h2>
+          <p className="mt-3 text-sm text-primary-600">
+            アカウントにログインしてください
+          </p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+        {/* ログインフォーム */}
+        <Card glow className="p-8">
+          <form className="space-y-6" onSubmit={handleLogin}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg">
-                {error}
+              <div className="bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg animate-fade-in">
+                <div className="flex items-center">
+                  <svg className="w-5 h-5 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <div className="text-sm whitespace-pre-line">{error}</div>
+                </div>
               </div>
             )}
+            
+            <Input
+              label="メールアドレス"
+              type="email"
+              autoComplete="email"
+              required
+              placeholder="admin@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+            
+            <Input
+              label="パスワード"
+              type="password"
+              autoComplete="current-password"
+              required
+              placeholder="パスワードを入力"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                メールアドレス
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="admin@talent-management.com"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                パスワード
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="パスワード"
-              />
-            </div>
-
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              variant="primary"
+              size="lg"
+              isLoading={loading}
+              className="w-full"
             >
-              {loading ? 'ログイン中...' : 'ログイン'}
-            </button>
+              ログイン
+            </Button>
           </form>
+        </Card>
 
-          <div className="mt-8 p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">デモアカウント</h3>
-            <div className="space-y-2 text-xs text-gray-600">
-              <p><strong>管理者:</strong> admin@talent-management.com / admin123</p>
-              <p><strong>部署担当者:</strong> dept@talent-management.com / dept123</p>
-            </div>
-          </div>
-        </div>
+        {/* フッター */}
+        <p className="text-center text-xs text-primary-500">
+          © 2024 海外技能実習生管理システム. All rights reserved.
+        </p>
       </div>
     </div>
-  );
+  )
 }

@@ -1,13 +1,9 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/api/dashboard/stats/route": "app/api/dashboard/stats/route.js",
-  "/api/login/route": "app/api/login/route.js",
-  "/api/health/route": "app/api/health/route.js",
-  "/api/supabase/route": "app/api/supabase/route.js",
-  "/api/test-supabase/route": "app/api/test-supabase/route.js",
+  "/dashboard/page": "app/dashboard/page.js",
+  "/dashboard/trainees/page": "app/dashboard/trainees/page.js",
+  "/dashboard/evaluations/new/page": "app/dashboard/evaluations/new/page.js",
+  "/dashboard/certificates/page": "app/dashboard/certificates/page.js",
+  "/api/auth/logout/route": "app/api/auth/logout/route.js",
   "/login/page": "app/login/page.js",
-  "/api/auth/login/route": "app/api/auth/login/route.js",
-  "/api/debug-supabase/route": "app/api/debug-supabase/route.js",
-  "/page": "app/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
+  "/icon.svg/route": "app/icon.svg/route.js"
 }
