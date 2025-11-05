@@ -4,6 +4,7 @@ import DashboardLayout from '@/components/layout/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { Trainee } from '@/types'
+import DeleteTraineeButton from '@/components/trainees/DeleteTraineeButton'
 
 export default async function TraineeDetailPage({
   params,
@@ -63,9 +64,12 @@ export default async function TraineeDetailPage({
               {trainee.last_name} {trainee.first_name} の詳細
             </h1>
           </div>
-          <Button href={`/dashboard/trainees/${resolvedParams.id}/edit`} variant="primary">
-            編集
-          </Button>
+          <div className="flex items-center space-x-3">
+            <Button href={`/dashboard/trainees/${resolvedParams.id}/edit`} variant="primary">
+              編集
+            </Button>
+            <DeleteTraineeButton traineeId={resolvedParams.id} traineeName={`${trainee.last_name} ${trainee.first_name}`} />
+          </div>
         </div>
 
         {/* プロフィールカード */}

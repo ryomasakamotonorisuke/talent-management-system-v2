@@ -22,6 +22,15 @@ export default async function DashboardPage() {
 
     const userDisplayName = session.user.email
 
+  // 現在のユーザーのロールを取得
+  const { data: currentUser } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', session.user.id)
+    .single()
+
+  const isAdmin = currentUser?.role === 'ADMIN'
+
     // 実習生データを取得
     const { data: trainees = [], error: traineesError } = await supabase
       .from('trainees')
@@ -135,6 +144,30 @@ export default async function DashboardPage() {
                   </div>
                 </Button>
               </Card>
+
+              {isAdmin && (
+                <Card hover glow className="p-6 group">
+                  <Button
+                    href="/dashboard/users"
+                    variant="ghost"
+                    className="w-full justify-start h-auto p-0"
+                  >
+                    <div className="flex items-center space-x-4 w-full">
+                      <div className="bg-orange-100 rounded-xl p-4 group-hover:bg-orange-200 transition-colors duration-300">
+                        <svg className="w-8 h-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                        </svg>
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-primary-900 group-hover:text-orange-600 transition-colors">
+                          ユーザー管理
+                        </h3>
+                        <p className="text-sm text-primary-500 mt-1">ユーザー作成・削除・管理</p>
+                      </div>
+                    </div>
+                  </Button>
+                </Card>
+              )}
             </div>
           </div>
         </div>
