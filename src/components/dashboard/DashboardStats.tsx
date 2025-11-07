@@ -10,22 +10,22 @@ export default function DashboardStats({ trainees = [], certificates = [] }: Das
   const safeTrainees = trainees || []
   const safeCertificates = certificates || []
 
-  // 実習生数（アクティブな実習生のみを取得しているため、全員がアクティブ）
-  const totalTrainees = safeTrainees.length
-  const activeTrainees = safeTrainees.length // アクティブな実習生のみを取得しているため、総数と同じ
+  // 実習生数（全実習生を取得しているため、アクティブと非アクティブを区別）
+  const totalTrainees = safeTrainees.length // 全実習生数（実際の登録人数）
+  const activeTrainees = safeTrainees.filter(t => t.is_active).length // アクティブな実習生数
 
-  // 国籍別集計
+  // 国籍別集計（アクティブな実習生のみで集計）
   const nationalityCount: Record<string, number> = {}
-  safeTrainees.forEach(t => {
+  safeTrainees.filter(t => t.is_active).forEach(t => {
     nationalityCount[t.nationality] = (nationalityCount[t.nationality] || 0) + 1
   })
   const nationalityData = Object.entries(nationalityCount)
-    .map(([name, count]) => ({ name, count, percentage: totalTrainees > 0 ? (count / totalTrainees) * 100 : 0 }))
+    .map(([name, count]) => ({ name, count, percentage: activeTrainees > 0 ? (count / activeTrainees) * 100 : 0 }))
     .sort((a, b) => b.count - a.count)
 
-  // 部署別集計
+  // 部署別集計（アクティブな実習生のみで集計）
   const departmentCount: Record<string, number> = {}
-  safeTrainees.forEach(t => {
+  safeTrainees.filter(t => t.is_active).forEach(t => {
     departmentCount[t.department] = (departmentCount[t.department] || 0) + 1
   })
   const departmentData = Object.entries(departmentCount)
@@ -153,10 +153,14 @@ export default function DashboardStats({ trainees = [], certificates = [] }: Das
             )}
           </div>
           <div className="mt-6 pt-6 border-t border-primary-200">
-            <div className="flex items-center justify-center space-x-2">
+            <div className="flex items-center justify-center space-x-4">
               <div className="text-center">
-                <p className="text-3xl font-bold gradient-text">{totalTrainees}</p>
-                <p className="text-xs text-primary-500">総実習生数</p>
+                <p className="text-3xl font-bold gradient-text">{activeTrainees}</p>
+                <p className="text-xs text-primary-500">アクティブ実習生数</p>
+              </div>
+              <div className="text-center border-l border-primary-200 pl-4">
+                <p className="text-3xl font-bold text-primary-600">{totalTrainees}</p>
+                <p className="text-xs text-primary-500">総登録人数</p>
               </div>
             </div>
           </div>
