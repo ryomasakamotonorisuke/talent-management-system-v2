@@ -31,10 +31,11 @@ export default async function DashboardPage() {
 
   const isAdmin = currentUser?.role === 'ADMIN'
 
-    // 実習生データを取得
+    // 実習生データを取得（アクティブな実習生のみ）
     const { data: trainees = [], error: traineesError } = await supabase
       .from('trainees')
       .select('*')
+      .eq('is_active', true)
       .order('created_at', { ascending: false })
 
     // 資格証明書データを取得

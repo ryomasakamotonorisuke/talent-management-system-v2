@@ -10,9 +10,9 @@ export default function DashboardStats({ trainees = [], certificates = [] }: Das
   const safeTrainees = trainees || []
   const safeCertificates = certificates || []
 
-  // 実習生数
+  // 実習生数（アクティブな実習生のみを取得しているため、全員がアクティブ）
   const totalTrainees = safeTrainees.length
-  const activeTrainees = safeTrainees.filter(t => t.is_active).length
+  const activeTrainees = safeTrainees.length // アクティブな実習生のみを取得しているため、総数と同じ
 
   // 国籍別集計
   const nationalityCount: Record<string, number> = {}
@@ -63,9 +63,9 @@ export default function DashboardStats({ trainees = [], certificates = [] }: Das
         <Card glow className="p-6 border-l-4 border-primary-500 animate-fade-in-up">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-primary-600">実習生総数</p>
-              <p className="text-4xl font-bold text-primary-900 mt-2">{totalTrainees}</p>
-              <p className="text-xs text-primary-500 mt-1">アクティブ: {activeTrainees}名</p>
+              <p className="text-sm font-medium text-primary-600">アクティブ実習生数</p>
+              <p className="text-4xl font-bold text-primary-900 mt-2">{activeTrainees}</p>
+              <p className="text-xs text-primary-500 mt-1">総数: {totalTrainees}名</p>
             </div>
             <div className="bg-primary-100 rounded-full p-4 animate-float">
               <svg className="w-10 h-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
