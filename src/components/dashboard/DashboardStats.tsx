@@ -1,5 +1,6 @@
 import { Trainee, Certificate } from '@/types'
 import Card from '@/components/ui/Card'
+import Link from 'next/link'
 
 interface DashboardStatsProps {
   trainees?: Trainee[] | null
@@ -60,72 +61,89 @@ export default function DashboardStats({ trainees = [], certificates = [] }: Das
     <div className="space-y-6">
       {/* 統計カード */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-        <Card glow className="p-6 border-l-4 border-primary-500 animate-fade-in-up">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-primary-600">アクティブ実習生数</p>
-              <p className="text-4xl font-bold text-primary-900 mt-2">{activeTrainees}</p>
-              <p className="text-xs text-primary-500 mt-1">総数: {totalTrainees}名</p>
+        <Link href="/dashboard/trainees">
+          <Card glow className="p-6 border-l-4 border-primary-500 animate-fade-in-up hover:shadow-lg transition-shadow cursor-pointer">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-primary-600">アクティブ実習生数</p>
+                <p className="text-4xl font-bold text-primary-900 mt-2">{activeTrainees}</p>
+                <p className="text-xs text-primary-500 mt-1">総数: {totalTrainees}名</p>
+              </div>
+              <div className="bg-primary-100 rounded-full p-4 animate-float">
+                <svg className="w-10 h-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              </div>
             </div>
-            <div className="bg-primary-100 rounded-full p-4 animate-float">
-              <svg className="w-10 h-10 text-primary-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </Link>
 
-        <Card glow className="p-6 border-l-4 border-red-500 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-primary-600">期限切れ資格</p>
-              <p className="text-4xl font-bold text-primary-900 mt-2">{expiredCertificates.length}</p>
-              <p className="text-xs text-red-600 mt-1 font-medium">要更新</p>
+        <Link href="/dashboard/certificates">
+          <Card glow className="p-6 border-l-4 border-red-500 animate-fade-in-up hover:shadow-lg transition-shadow cursor-pointer" style={{ animationDelay: '0.1s' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-primary-600">期限切れ資格</p>
+                <p className="text-4xl font-bold text-primary-900 mt-2">{expiredCertificates.length}</p>
+                <p className="text-xs text-red-600 mt-1 font-medium">要更新</p>
+              </div>
+              <div className="bg-red-100 rounded-full p-4 animate-float" style={{ animationDelay: '0.2s' }}>
+                <svg className="w-10 h-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
             </div>
-            <div className="bg-red-100 rounded-full p-4 animate-float" style={{ animationDelay: '0.2s' }}>
-              <svg className="w-10 h-10 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </Link>
 
-        <Card glow className="p-6 border-l-4 border-orange-500 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-primary-600">期限間近資格</p>
-              <p className="text-4xl font-bold text-primary-900 mt-2">{expiringCertificates.length}</p>
-              <p className="text-xs text-orange-600 mt-1 font-medium">30日以内</p>
+        <Link href="/dashboard/certificates">
+          <Card glow className="p-6 border-l-4 border-orange-500 animate-fade-in-up hover:shadow-lg transition-shadow cursor-pointer" style={{ animationDelay: '0.2s' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-primary-600">期限間近資格</p>
+                <p className="text-4xl font-bold text-primary-900 mt-2">{expiringCertificates.length}</p>
+                <p className="text-xs text-orange-600 mt-1 font-medium">30日以内</p>
+              </div>
+              <div className="bg-orange-100 rounded-full p-4 animate-float" style={{ animationDelay: '0.4s' }}>
+                <svg className="w-10 h-10 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
             </div>
-            <div className="bg-orange-100 rounded-full p-4 animate-float" style={{ animationDelay: '0.4s' }}>
-              <svg className="w-10 h-10 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </Link>
 
-        <Card glow className="p-6 border-l-4 border-green-500 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-primary-600">有効資格</p>
-              <p className="text-4xl font-bold text-primary-900 mt-2">{safeCertificates.length - expiredCertificates.length - expiringCertificates.length}</p>
-              <p className="text-xs text-green-600 mt-1 font-medium">正常</p>
+        <Link href="/dashboard/certificates">
+          <Card glow className="p-6 border-l-4 border-green-500 animate-fade-in-up hover:shadow-lg transition-shadow cursor-pointer" style={{ animationDelay: '0.3s' }}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-primary-600">有効資格</p>
+                <p className="text-4xl font-bold text-primary-900 mt-2">{safeCertificates.length - expiredCertificates.length - expiringCertificates.length}</p>
+                <p className="text-xs text-green-600 mt-1 font-medium">正常</p>
+              </div>
+              <div className="bg-green-100 rounded-full p-4 animate-float" style={{ animationDelay: '0.6s' }}>
+                <svg className="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
             </div>
-            <div className="bg-green-100 rounded-full p-4 animate-float" style={{ animationDelay: '0.6s' }}>
-              <svg className="w-10 h-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </Card>
+          </Card>
+        </Link>
       </div>
 
       {/* グラフエリア */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* 国籍別分布 */}
-        <Card glow className="p-6 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-          <h3 className="text-lg font-semibold text-primary-900 mb-6">国籍別分布</h3>
+        <Link href="/dashboard/trainees">
+          <Card glow className="p-6 animate-fade-in-up hover:shadow-lg transition-shadow cursor-pointer" style={{ animationDelay: '0.4s' }}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-primary-900">国籍別分布</h3>
+              <span className="text-sm text-primary-600 hover:text-primary-800 font-medium flex items-center">
+                詳細を見る
+                <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </div>
           <div className="space-y-5">
             {nationalityData.map((item, index) => (
               <div key={item.name} className="space-y-2">
@@ -164,11 +182,21 @@ export default function DashboardStats({ trainees = [], certificates = [] }: Das
               </div>
             </div>
           </div>
-        </Card>
+          </Card>
+        </Link>
 
         {/* 部署別人数表 */}
-        <Card glow className="p-6 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
-          <h3 className="text-lg font-semibold text-primary-900 mb-6">部署別人数</h3>
+        <Link href="/dashboard/trainees">
+          <Card glow className="p-6 animate-fade-in-up hover:shadow-lg transition-shadow cursor-pointer" style={{ animationDelay: '0.5s' }}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-primary-900">部署別人数</h3>
+              <span className="text-sm text-primary-600 hover:text-primary-800 font-medium flex items-center">
+                詳細を見る
+                <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </div>
           <div className="space-y-3">
             {departmentData.map((dept, index) => (
               <div 
@@ -189,18 +217,28 @@ export default function DashboardStats({ trainees = [], certificates = [] }: Das
               <p className="text-center text-primary-500 py-8">データがありません</p>
             )}
           </div>
-        </Card>
+          </Card>
+        </Link>
       </div>
 
       {/* 資格期限アラート */}
       {(expiredCertificates.length > 0 || expiringCertificates.length > 0) && (
-        <Card glow className="p-6 border-l-4 border-red-500 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-          <h3 className="text-lg font-semibold text-primary-900 mb-4 flex items-center">
-            <svg className="w-5 h-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            資格更新アラート
-          </h3>
+        <Link href="/dashboard/certificates">
+          <Card glow className="p-6 border-l-4 border-red-500 animate-fade-in-up hover:shadow-lg transition-shadow cursor-pointer" style={{ animationDelay: '0.6s' }}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-primary-900 flex items-center">
+                <svg className="w-5 h-5 text-red-500 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                資格更新アラート
+              </h3>
+              <span className="text-sm text-primary-600 hover:text-primary-800 font-medium flex items-center">
+                詳細を見る
+                <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </div>
           <div className="space-y-2">
             {expiredCertificates.slice(0, 5).map((cert) => (
               <div key={cert.id} className="flex items-center justify-between p-4 bg-red-50 border border-red-200 rounded-lg animate-fade-in">
@@ -221,7 +259,8 @@ export default function DashboardStats({ trainees = [], certificates = [] }: Das
               </div>
             ))}
           </div>
-        </Card>
+          </Card>
+        </Link>
       )}
     </div>
   )

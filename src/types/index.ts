@@ -160,5 +160,49 @@ export interface Interview {
   updated_at: string
 }
 
+/**
+ * スキルマスター型
+ */
+export interface SkillMaster {
+  id: string
+  name: string
+  category: string
+  description?: string
+  levels?: unknown
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
+/**
+ * 拡張された実習生型（社宅情報を含む）
+ */
+export interface TraineeWithResidence extends Trainee {
+  residence_address?: string
+}
+
+/**
+ * 拡張された評価型（関連データを含む）
+ */
+export interface EnrichedEvaluation extends Evaluation {
+  skill: SkillMaster | null
+  evaluator: User | null
+  trainee?: Trainee | null
+}
+
+/**
+ * 通知データ型
+ */
+export interface Notification {
+  id: string
+  user_id: string
+  type: string
+  title: string
+  message: string
+  is_read: boolean
+  created_at: string
+  updated_at: string
+}
+
 
 

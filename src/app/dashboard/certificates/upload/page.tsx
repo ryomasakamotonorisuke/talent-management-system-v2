@@ -25,7 +25,11 @@ function CertificateUploadForm() {
 
   useEffect(() => {
     const fetchTrainees = async () => {
-      const { data } = await supabase.from('trainees').select('id, first_name, last_name').order('last_name')
+      const { data } = await supabase
+        .from('trainees')
+        .select('id, first_name, last_name')
+        .eq('is_active', true)
+        .order('last_name')
       setTrainees(data || [])
     }
     fetchTrainees()

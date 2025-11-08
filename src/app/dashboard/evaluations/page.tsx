@@ -1,6 +1,7 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { EnrichedEvaluation, Evaluation, Trainee, User, SkillMaster } from '@/types'
 
 export default async function EvaluationsPage() {
   const supabase = await createSupabaseServerClient()
@@ -24,11 +25,11 @@ export default async function EvaluationsPage() {
     .select('*')
     .order('updated_at', { ascending: false })
   
-  const safeEvaluations = evaluations || []
+  const safeEvaluations: Evaluation[] = evaluations || []
 
   // 関連データを取得して結合
-  const enrichedEvaluations = await Promise.all(
-    safeEvaluations.map(async (e: any) => {
+  const enrichedEvaluations: EnrichedEvaluation[] = await Promise.all(
+    safeEvaluations.map(async (e): Promise<EnrichedEvaluation> => {
       // 実習生情報を取得
       const { data: trainee } = await supabase
         .from('trainees')
@@ -52,9 +53,9 @@ export default async function EvaluationsPage() {
 
       return {
         ...e,
-        trainee: trainee || null,
-        evaluator: evaluator || null,
-        skill: skill || null,
+        trainee: (trainee as Trainee | null) || null,
+        evaluator: (evaluator as User | null) || null,
+        skill: (skill as SkillMaster | null) || null,
       }
     })
   )
@@ -101,7 +102,7 @@ export default async function EvaluationsPage() {
             </div>
           ) : (
             <div className="space-y-4">
-              {enrichedEvaluations.map((e: any) => {
+              {enrichedEvaluations.map((e) => {
                 const trainee = e.trainee
                 const evaluator = e.evaluator
                 const skill = e.skill

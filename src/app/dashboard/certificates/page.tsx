@@ -2,6 +2,7 @@ import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import CertificatePreview from '@/components/certificates/CertificatePreview'
+import { Certificate } from '@/types'
 
 export default async function CertificatesPage() {
   const supabase = await createSupabaseServerClient()
@@ -25,14 +26,14 @@ export default async function CertificatesPage() {
     .eq('is_active', true)
     .order('created_at', { ascending: false })
 
-  const safeCertificates = certificates || []
+  const safeCertificates: Certificate[] = certificates || []
 
   const today = new Date()
   const soon = new Date()
   soon.setDate(today.getDate() + 30)
 
-  const expired = safeCertificates.filter((c: any) => c.expiry_date && new Date(c.expiry_date) < today)
-  const expiring = safeCertificates.filter((c: any) => {
+  const expired = safeCertificates.filter((c) => c.expiry_date && new Date(c.expiry_date) < today)
+  const expiring = safeCertificates.filter((c) => {
     if (!c.expiry_date) return false
     const d = new Date(c.expiry_date)
     return d >= today && d <= soon
@@ -70,7 +71,7 @@ export default async function CertificatesPage() {
               <div className="bg-white rounded-xl shadow-md p-6">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">期限アラート</h2>
                 <div className="space-y-2">
-                  {expired.map((c: any) => (
+                  {expired.map((c) => (
                     <div key={c.id} className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
                       <div>
                         <p className="font-medium text-red-900">{c.name}</p>
@@ -79,7 +80,7 @@ export default async function CertificatesPage() {
                       <span className="px-2 py-1 bg-red-500 text-white text-xs rounded-full">期限切れ</span>
                     </div>
                   ))}
-                  {expiring.map((c: any) => (
+                  {expiring.map((c) => (
                     <div key={c.id} className="flex items-center justify-between p-3 bg-orange-50 border border-orange-200 rounded-lg">
                       <div>
                         <p className="font-medium text-orange-900">{c.name}</p>
@@ -104,7 +105,7 @@ export default async function CertificatesPage() {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {safeCertificates.map((c: any) => (
+                  {safeCertificates.map((c) => (
                     <tr key={c.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{c.name}</td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">{c.issuing_body || '-'}</td>

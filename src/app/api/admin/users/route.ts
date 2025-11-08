@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server'
 import { createSupabaseAdmin } from '@/lib/supabase/client'
+import { logger } from '@/lib/logger'
 
 export async function POST(request: Request) {
   const supabase = await createSupabaseServerClient()
@@ -29,13 +30,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    // 環境変数の確認
-    if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-      console.error('SUPABASE_SERVICE_ROLE_KEY is not set')
-      return NextResponse.json({ 
-        error: 'サーバー設定エラー: SUPABASE_SERVICE_ROLE_KEYが設定されていません。環境変数を確認してください。' 
-      }, { status: 500 })
-    }
+    // 環境変数の確認（createSupabaseAdmin内で検証されるが、念のため）
 
     // 既存ユーザーのチェック（メールアドレスで）
     const { data: existingUser } = await supabase
@@ -60,7 +55,7 @@ export async function POST(request: Request) {
     })
     
     if (createError) {
-      console.error('Auth user creation error:', createError)
+      logger.error('Auth user creation error', createError)
       // 既に存在するユーザーの場合
       if (createError.message?.includes('already registered') || 
           createError.message?.includes('already exists') ||
@@ -123,8 +118,8 @@ export async function POST(request: Request) {
 
             return NextResponse.json({ ok: true, user_id: userId, message: '既存のAuthユーザーを使用してユーザーを作成しました。' })
           }
-        } catch (syncError: any) {
-          console.error('Error syncing existing auth user:', syncError)
+        } catch (syncError) {
+          logger.error('Error syncing existing auth user', syncError)
         }
         
         return NextResponse.json({ 
@@ -152,7 +147,7 @@ export async function POST(request: Request) {
       try {
         await admin.auth.admin.deleteUser(userId)
       } catch (deleteError) {
-        console.error('Failed to delete auth user:', deleteError)
+        logger.error('Failed to delete auth user', deleteError)
       }
       return NextResponse.json({ 
         error: 'このユーザーは既に存在します。' 
@@ -170,13 +165,13 @@ export async function POST(request: Request) {
     })
     
     if (insertUserError) {
-      console.error('Users table insert error:', insertUserError)
+      logger.error('Users table insert error', insertUserError)
       // Authユーザーは作成されたが、usersテーブルへの挿入に失敗した場合
       // Authユーザーを削除してクリーンアップ
       try {
         await admin.auth.admin.deleteUser(userId)
       } catch (deleteError) {
-        console.error('Failed to delete auth user after insert error:', deleteError)
+        logger.error('Failed to delete auth user after insert error', deleteError)
       }
       
       if (insertUserError.code === '23505') {
@@ -195,7 +190,7 @@ export async function POST(request: Request) {
     })
     
     if (linkError) {
-      console.error('User organizations insert error:', linkError)
+      logger.error('User organizations insert error', linkError)
       // ユーザーは作成されたが、組織との紐付けに失敗した場合
       // これは警告レベルなので、エラーを返さずに続行することも可能
       // ただし、ここではエラーとして返す
@@ -205,10 +200,11 @@ export async function POST(request: Request) {
     }
 
     return NextResponse.json({ ok: true, user_id: userId })
-  } catch (e: any) {
-    console.error('User creation error:', e)
+  } catch (error) {
+    logger.error('User creation error', error)
+    const errorMessage = error instanceof Error ? error.message : 'ユーザー作成に失敗しました。詳細はサーバーログを確認してください。'
     return NextResponse.json({ 
-      error: e.message || 'ユーザー作成に失敗しました。詳細はサーバーログを確認してください。' 
+      error: errorMessage
     }, { status: 500 })
   }
 }

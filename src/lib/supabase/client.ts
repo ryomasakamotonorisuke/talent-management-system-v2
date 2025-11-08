@@ -1,15 +1,14 @@
 import { createBrowserClient } from '@supabase/ssr'
 import { createClient } from '@supabase/supabase-js'
+import { getSupabaseEnv } from '@/lib/env'
 
 /**
  * クライアント側で使用するSupabaseクライアント
  * ブラウザでのみ実行されます
  */
 export function createSupabaseClient() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
+  const { url, anonKey } = getSupabaseEnv()
+  return createBrowserClient(url, anonKey)
 }
 
 /**
@@ -17,16 +16,15 @@ export function createSupabaseClient() {
  * サービスロールキーを使用（管理者権限）
  */
 export function createSupabaseAdmin() {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  const { url, serviceRoleKey } = getSupabaseEnv()
 
-  if (!supabaseUrl || !supabaseServiceKey) {
+  if (!serviceRoleKey) {
     throw new Error(
-      'Missing Supabase environment variables. Please check your .env.local file.'
+      'Missing SUPABASE_SERVICE_ROLE_KEY environment variable. Please check your .env.local file.'
     )
   }
 
-  return createClient(supabaseUrl, supabaseServiceKey, {
+  return createClient(url, serviceRoleKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,

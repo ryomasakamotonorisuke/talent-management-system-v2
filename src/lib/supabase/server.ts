@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { getSupabaseEnv } from '@/lib/env'
 
 /**
  * サーバー側で使用するSupabaseクライアント（認証済みユーザー用）
@@ -7,10 +8,11 @@ import { cookies } from 'next/headers'
  */
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies()
+  const { url, anonKey } = getSupabaseEnv()
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    url,
+    anonKey,
     {
       cookies: {
         get(name: string) {

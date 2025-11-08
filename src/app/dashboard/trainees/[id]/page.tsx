@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation'
 import DashboardLayout from '@/components/layout/DashboardLayout'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
-import { Trainee } from '@/types'
+import { Trainee, TraineeWithResidence, EnrichedEvaluation, Certificate, SkillMaster, User } from '@/types'
 import DeleteTraineeButton from '@/components/trainees/DeleteTraineeButton'
 import Link from 'next/link'
 import CertificatePreview from '@/components/certificates/CertificatePreview'
@@ -50,7 +50,8 @@ export default async function TraineeDetailPage({
   }
 
   // 社宅住所を優先、なければ通常の住所を使用
-  const address = (trainee as any).residence_address || trainee.address || null
+  const traineeWithResidence = trainee as TraineeWithResidence
+  const address = traineeWithResidence.residence_address || trainee.address || null
   const mapsUrl = address ? getGoogleMapsUrl(address) : null
 
   // この実習生に紐づく証明書を取得
@@ -61,7 +62,7 @@ export default async function TraineeDetailPage({
     .eq('is_active', true)
     .order('created_at', { ascending: false })
 
-  const safeCertificates = certificates || []
+  const safeCertificates: Certificate[] = certificates || []
 
   // この実習生に紐づくスキル評価を取得
   const { data: evaluations } = await supabase
@@ -73,8 +74,8 @@ export default async function TraineeDetailPage({
   const safeEvaluations = evaluations || []
 
   // 評価データを拡張（スキル情報と評価者情報を取得）
-  const enrichedEvaluations = await Promise.all(
-    safeEvaluations.map(async (e: any) => {
+  const enrichedEvaluations: EnrichedEvaluation[] = await Promise.all(
+    safeEvaluations.map(async (e) => {
       // スキル情報を取得
       const { data: skill } = await supabase
         .from('skill_masters')
@@ -91,8 +92,8 @@ export default async function TraineeDetailPage({
 
       return {
         ...e,
-        skill: skill || null,
-        evaluator: evaluator || null,
+        skill: (skill as SkillMaster | null) || null,
+        evaluator: (evaluator as User | null) || null,
       }
     })
   )
@@ -234,7 +235,7 @@ export default async function TraineeDetailPage({
               </div>
             ) : (
               <div className="space-y-4">
-                {safeCertificates.slice(0, 5).map((cert: any) => (
+                {safeCertificates.slice(0, 5).map((cert) => (
                   <div
                     key={cert.id}
                     className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
@@ -290,15 +291,26 @@ export default async function TraineeDetailPage({
         <Card className="overflow-hidden">
           <div className="px-6 py-5 bg-primary-50 border-b border-primary-200 flex items-center justify-between">
             <h3 className="text-lg font-semibold text-primary-900">スキル評価</h3>
-            <Link
-              href="/dashboard/evaluations"
-              className="text-sm text-primary-600 hover:text-primary-800 font-medium flex items-center space-x-1"
-            >
-              <span>すべて見る</span>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
+            <div className="flex items-center space-x-3">
+              <Link
+                href={`/dashboard/evaluations/new?traineeId=${resolvedParams.id}`}
+                className="px-3 py-1.5 text-sm text-white bg-primary-600 hover:bg-primary-700 rounded-lg font-medium flex items-center space-x-1 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <span>評価を追加</span>
+              </Link>
+              <Link
+                href="/dashboard/evaluations"
+                className="text-sm text-primary-600 hover:text-primary-800 font-medium flex items-center space-x-1"
+              >
+                <span>すべて見る</span>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
           </div>
           <div className="p-6">
             {enrichedEvaluations.length === 0 ? (
@@ -316,7 +328,7 @@ export default async function TraineeDetailPage({
               </div>
             ) : (
               <div className="space-y-4">
-                {enrichedEvaluations.slice(0, 5).map((evaluation: any) => (
+                {enrichedEvaluations.slice(0, 5).map((evaluation) => (
                   <div
                     key={evaluation.id}
                     className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors"
@@ -388,6 +400,17 @@ export default async function TraineeDetailPage({
                     </Link>
                   </div>
                 )}
+                <div className="pt-4 border-t border-gray-200">
+                  <Link
+                    href={`/dashboard/evaluations/new?traineeId=${resolvedParams.id}`}
+                    className="w-full px-4 py-2 text-sm text-primary-600 hover:text-primary-800 font-medium border border-primary-300 rounded-lg hover:bg-primary-50 transition-colors flex items-center justify-center space-x-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    <span>評価を追加</span>
+                  </Link>
+                </div>
               </div>
             )}
           </div>
