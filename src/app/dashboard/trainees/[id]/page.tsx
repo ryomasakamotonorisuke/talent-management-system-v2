@@ -250,7 +250,6 @@ export default async function TraineeDetailPage({
             <InfoRow label="ビザ有効期限" value={trainee.visa_expiry_date} type="date" />
             <InfoRow label="入国日" value={trainee.entry_date} type="date" />
             <InfoRow label="退去日" value={trainee.departure_date} type="date" />
-            <InfoRow label="生年月日" value={traineeWithResidence.date_of_birth} type="date" />
           </div>
         </Card>
 
@@ -285,7 +284,7 @@ export default async function TraineeDetailPage({
           </div>
           <div className="divide-y divide-gray-200">
             <InfoRow label="管理団体" value={traineeWithResidence.supervising_organization} />
-            <InfoRow label="家賃" value={traineeWithResidence.monthly_rent} type="currency" />
+            <InfoRow label="家賃（円）" value={traineeWithResidence.monthly_rent} type="currency" />
             <InfoRow label="管理会社" value={traineeWithResidence.management_company} />
             <InfoRow label="入寮日（入社日）" value={traineeWithResidence.move_in_date} type="date" />
             <InfoRow label="在留カード番号" value={traineeWithResidence.residence_card_number} />
@@ -294,6 +293,7 @@ export default async function TraineeDetailPage({
             <InfoRow label="ガス契約先" value={traineeWithResidence.gas_provider} />
             <InfoRow label="水道契約先" value={traineeWithResidence.water_provider} />
             <InfoRow label="期" value={traineeWithResidence.batch_period} />
+            <InfoRow label="生年月日" value={traineeWithResidence.date_of_birth} type="date" />
           </div>
         </Card>
 
