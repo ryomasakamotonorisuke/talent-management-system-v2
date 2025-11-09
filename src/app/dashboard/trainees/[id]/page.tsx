@@ -45,13 +45,64 @@ export default async function TraineeDetailPage({
     redirect('/login')
   }
 
+  // 明示的にカラムを指定して取得（スキーマキャッシュの問題を回避）
   const { data: trainee, error } = await supabase
     .from('trainees')
-    .select('*')
+    .select(`
+      id,
+      organization_id,
+      trainee_id,
+      first_name,
+      last_name,
+      first_name_kana,
+      last_name_kana,
+      nationality,
+      passport_number,
+      visa_type,
+      visa_expiry_date,
+      entry_date,
+      departure_date,
+      department,
+      position,
+      photo,
+      phone_number,
+      email,
+      address,
+      emergency_contact,
+      emergency_phone,
+      supervising_organization,
+      monthly_rent,
+      management_company,
+      electric_provider,
+      gas_provider,
+      water_provider,
+      move_in_date,
+      batch_period,
+      residence_address,
+      residence_card_number,
+      date_of_birth,
+      workplace_manager_name,
+      workplace_name,
+      area_manager,
+      technical_instructor,
+      life_instructor,
+      is_active,
+      created_at,
+      updated_at
+    `)
     .eq('id', resolvedParams.id)
     .single()
 
-  if (error || !trainee) {
+  if (error) {
+    // スキーマエラーの場合は、より詳細なエラーメッセージを表示
+    if (error.message?.includes('batch_period') || error.message?.includes('column')) {
+      console.error('スキーマエラー:', error.message)
+      console.error('データベースにカラムが存在しない可能性があります。docs/fix-batch-period-column.sql を実行してください。')
+    }
+    notFound()
+  }
+
+  if (!trainee) {
     notFound()
   }
 
@@ -525,10 +576,10 @@ export default async function TraineeDetailPage({
                   <Link
                     href={`/dashboard/evaluations/new?traineeId=${resolvedParams.id}`}
                     className="w-full px-4 py-2 text-sm text-primary-600 hover:text-primary-800 font-medium border border-primary-300 rounded-lg hover:bg-primary-50 transition-colors flex items-center justify-center space-x-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
+                      </svg>
                     <span>評価を追加</span>
                   </Link>
                 </div>

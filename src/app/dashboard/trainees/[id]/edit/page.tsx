@@ -60,12 +60,57 @@ export default function EditTraineePage() {
       try {
         setLoading(true)
         setError(null)
+        // 明示的にカラムを指定して取得（スキーマキャッシュの問題を回避）
         const { data, error } = await supabase
           .from('trainees')
-          .select('*')
+          .select(`
+            id,
+            organization_id,
+            trainee_id,
+            first_name,
+            last_name,
+            first_name_kana,
+            last_name_kana,
+            nationality,
+            passport_number,
+            visa_type,
+            visa_expiry_date,
+            entry_date,
+            departure_date,
+            department,
+            position,
+            photo,
+            phone_number,
+            email,
+            address,
+            emergency_contact,
+            emergency_phone,
+            supervising_organization,
+            monthly_rent,
+            management_company,
+            electric_provider,
+            gas_provider,
+            water_provider,
+            move_in_date,
+            batch_period,
+            residence_address,
+            residence_card_number,
+            date_of_birth,
+            workplace_manager_name,
+            workplace_name,
+            area_manager,
+            technical_instructor,
+            life_instructor,
+            is_active,
+            created_at,
+            updated_at
+          `)
           .eq('id', traineeId)
           .single()
-        if (error) throw error
+        if (error) {
+          console.error('データ取得エラー:', error)
+          throw error
+        }
         if (data) {
           setFormData({
             trainee_id: data.trainee_id || '',
