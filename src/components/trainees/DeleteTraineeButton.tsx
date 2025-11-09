@@ -50,3 +50,7 @@ export default function DeleteTraineeButton({ traineeId, traineeName }: DeleteTr
   )
 }
 
+
+
+
+

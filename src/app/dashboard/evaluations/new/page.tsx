@@ -1,12 +1,13 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createSupabaseClient } from '@/lib/supabase/client'
 
 export default function NewEvaluationPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createSupabaseClient()
 
   const [trainees, setTrainees] = useState<Array<{ id: string; trainee_id: string; first_name: string; last_name: string }>>([])
@@ -40,9 +41,15 @@ export default function NewEvaluationPage() {
 
       // 評価日を今日に設定
       setEvaluationDate(new Date().toISOString().split('T')[0])
+
+      // URLパラメータから実習生IDを取得して設定
+      const traineeIdParam = searchParams.get('traineeId')
+      if (traineeIdParam) {
+        setTraineeId(traineeIdParam)
+      }
     }
     fetchData()
-  }, [])
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -73,8 +80,9 @@ export default function NewEvaluationPage() {
 
       router.push('/dashboard/evaluations')
       router.refresh()
-    } catch (e: any) {
-      setError(e.message || '評価の登録に失敗しました')
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : '評価の登録に失敗しました'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -109,20 +117,42 @@ export default function NewEvaluationPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">スキル</label>
-            <select
-              value={skillId}
-              onChange={(e) => setSkillId(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-              required
-            >
-              <option value="">選択してください</option>
-              {skills.map(skill => (
-                <option key={skill.id} value={skill.id}>
-                  {skill.name} ({skill.category})
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-sm font-medium text-gray-700">スキル</label>
+              {skills.length === 0 && (
+                <Link
+                  href="/dashboard/skills/new"
+                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  スキルを登録 →
+                </Link>
+              )}
+            </div>
+            {skills.length === 0 ? (
+              <div className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 text-center">
+                <p className="text-sm text-gray-600 mb-2">スキルマスターが登録されていません</p>
+                <Link
+                  href="/dashboard/skills/new"
+                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  スキルマスターを登録する
+                </Link>
+              </div>
+            ) : (
+              <select
+                value={skillId}
+                onChange={(e) => setSkillId(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                required
+              >
+                <option value="">選択してください</option>
+                {skills.map(skill => (
+                  <option key={skill.id} value={skill.id}>
+                    {skill.name} ({skill.category})
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <div>

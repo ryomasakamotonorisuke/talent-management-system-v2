@@ -73,6 +73,12 @@ export interface Trainee {
   residence_address?: string // 社宅住所（REQ-006用）
   residence_card_number?: string // 在留カード番号
   date_of_birth?: string // 生年月日
+  // 追加項目
+  workplace_manager_name?: string // 事業所責任者名
+  workplace_name?: string // 勤務事業所
+  area_manager?: string // 担当エリアマネージャー
+  technical_instructor?: string // 技能実習指導員
+  life_instructor?: string // 生活指導員
   is_active: boolean
   created_at: string
   updated_at: string

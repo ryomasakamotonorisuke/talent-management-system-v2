@@ -154,8 +154,13 @@ export default async function TraineeDetailPage({
 
         {/* 基本情報カード */}
         <Card className="overflow-hidden">
-          <div className="px-6 py-5 bg-primary-50 border-b border-primary-200">
-            <h3 className="text-lg font-semibold text-primary-900">基本情報</h3>
+          <div className="px-6 py-5 bg-gradient-to-r from-blue-600 to-blue-700 border-b border-blue-800">
+            <div className="flex items-center space-x-3">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+              <h3 className="text-lg font-bold text-white">基本情報</h3>
+            </div>
           </div>
           <div className="divide-y divide-primary-100">
             {[
@@ -175,6 +180,11 @@ export default async function TraineeDetailPage({
                 label: '住所', 
                 value: address,
                 mapsUrl: mapsUrl
+              },
+              traineeWithResidence.residence_address && { 
+                label: '社宅住所', 
+                value: traineeWithResidence.residence_address,
+                mapsUrl: getGoogleMapsUrl(traineeWithResidence.residence_address)
               },
             ].filter(Boolean).map((item, index) => (
               <div 
@@ -205,13 +215,172 @@ export default async function TraineeDetailPage({
           </div>
         </Card>
 
+        {/* 連絡先情報カード */}
+        {(trainee.phone_number || trainee.email || trainee.address || trainee.emergency_contact || trainee.emergency_phone) && (
+          <Card className="overflow-hidden">
+            <div className="px-6 py-5 bg-gradient-to-r from-green-600 to-green-700 border-b border-green-800">
+              <div className="flex items-center space-x-3">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+                <h3 className="text-lg font-bold text-white">連絡先情報</h3>
+              </div>
+            </div>
+            <div className="divide-y divide-primary-100">
+              {[
+                trainee.phone_number ? { label: '電話番号', value: trainee.phone_number } : null,
+                trainee.email ? { label: 'メールアドレス', value: trainee.email } : null,
+                trainee.address ? { label: '住所', value: trainee.address, mapsUrl: getGoogleMapsUrl(trainee.address) } : null,
+                trainee.emergency_contact ? { label: '緊急連絡先（氏名）', value: trainee.emergency_contact } : null,
+                trainee.emergency_phone ? { label: '緊急連絡先（電話番号）', value: trainee.emergency_phone } : null,
+              ].filter((item): item is { label: string; value: string; mapsUrl?: string | null } => item !== null).map((item, index) => (
+                <div 
+                  key={index} 
+                  className={`px-6 py-4 sm:grid sm:grid-cols-3 sm:gap-4 ${
+                    index % 2 === 0 ? 'bg-white' : 'bg-green-50'
+                  }`}
+                >
+                  <dt className="text-sm font-medium text-primary-600">{item.label}</dt>
+                  <dd className="mt-1 text-sm text-primary-900 sm:mt-0 sm:col-span-2 flex items-center justify-between">
+                    <span>{item.value}</span>
+                    {item.mapsUrl && (
+                      <a
+                        href={item.mapsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-4 px-3 py-1.5 text-xs font-medium text-green-700 bg-green-50 rounded-lg hover:bg-green-100 transition-colors flex items-center space-x-1"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                        </svg>
+                        <span>地図</span>
+                      </a>
+                    )}
+                  </dd>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* 社宅・管理関連情報カード */}
+        {(traineeWithResidence.supervising_organization || 
+          traineeWithResidence.monthly_rent || 
+          traineeWithResidence.management_company ||
+          traineeWithResidence.electric_provider ||
+          traineeWithResidence.gas_provider ||
+          traineeWithResidence.water_provider ||
+          traineeWithResidence.move_in_date ||
+          traineeWithResidence.batch_period ||
+          traineeWithResidence.residence_card_number ||
+          traineeWithResidence.date_of_birth) && (
+          <Card className="overflow-hidden">
+            <div className="px-6 py-5 bg-gradient-to-r from-purple-600 to-purple-700 border-b border-purple-800">
+              <div className="flex items-center space-x-3">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                <h3 className="text-lg font-bold text-white">社宅・管理関連情報</h3>
+              </div>
+            </div>
+            <div className="divide-y divide-primary-100">
+              {[
+                traineeWithResidence.supervising_organization ? { label: '管理団体', value: traineeWithResidence.supervising_organization } : null,
+                traineeWithResidence.monthly_rent ? { label: '家賃', value: `${traineeWithResidence.monthly_rent.toLocaleString()}円` } : null,
+                traineeWithResidence.management_company ? { label: '管理会社', value: traineeWithResidence.management_company } : null,
+                traineeWithResidence.move_in_date ? { label: '入寮日（入社日）', value: new Date(traineeWithResidence.move_in_date).toLocaleDateString('ja-JP') } : null,
+                traineeWithResidence.residence_card_number ? { label: '在留カード番号', value: traineeWithResidence.residence_card_number } : null,
+                traineeWithResidence.electric_provider ? { label: '電気契約先', value: traineeWithResidence.electric_provider } : null,
+                traineeWithResidence.gas_provider ? { label: 'ガス契約先', value: traineeWithResidence.gas_provider } : null,
+                traineeWithResidence.water_provider ? { label: '水道契約先', value: traineeWithResidence.water_provider } : null,
+                traineeWithResidence.batch_period ? { label: '期', value: traineeWithResidence.batch_period } : null,
+                traineeWithResidence.date_of_birth ? { label: '生年月日', value: new Date(traineeWithResidence.date_of_birth).toLocaleDateString('ja-JP') } : null,
+              ].filter((item): item is { label: string; value: string } => item !== null).map((item, index) => (
+                <div 
+                  key={index} 
+                  className={`px-6 py-4 sm:grid sm:grid-cols-3 sm:gap-4 ${
+                    index % 2 === 0 ? 'bg-white' : 'bg-primary-50'
+                  }`}
+                >
+                  <dt className="text-sm font-medium text-primary-600">{item.label}</dt>
+                  <dd className="mt-1 text-sm text-primary-900 sm:mt-0 sm:col-span-2">
+                    {item.value}
+                  </dd>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
+
+        {/* 事業所・指導員関連情報カード */}
+        {(() => {
+          const extendedTrainee = trainee as Trainee & {
+            workplace_manager_name?: string
+            workplace_name?: string
+            area_manager?: string
+            technical_instructor?: string
+            life_instructor?: string
+          }
+          return extendedTrainee.workplace_manager_name || 
+                 extendedTrainee.workplace_name || 
+                 extendedTrainee.area_manager ||
+                 extendedTrainee.technical_instructor ||
+                 extendedTrainee.life_instructor
+        })() ? (
+          <Card className="overflow-hidden">
+            <div className="px-6 py-5 bg-gradient-to-r from-orange-600 to-orange-700 border-b border-orange-800">
+              <div className="flex items-center space-x-3">
+                <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                <h3 className="text-lg font-bold text-white">事業所・指導員関連情報</h3>
+              </div>
+            </div>
+            <div className="divide-y divide-primary-100">
+              {(() => {
+                const extendedTrainee = trainee as Trainee & {
+                  workplace_manager_name?: string
+                  workplace_name?: string
+                  area_manager?: string
+                  technical_instructor?: string
+                  life_instructor?: string
+                }
+                return [
+                  extendedTrainee.workplace_manager_name ? { label: '事業所責任者名', value: extendedTrainee.workplace_manager_name } : null,
+                  extendedTrainee.workplace_name ? { label: '勤務事業所', value: extendedTrainee.workplace_name } : null,
+                  extendedTrainee.area_manager ? { label: '担当エリアマネージャー', value: extendedTrainee.area_manager } : null,
+                  extendedTrainee.technical_instructor ? { label: '技能実習指導員', value: extendedTrainee.technical_instructor } : null,
+                  extendedTrainee.life_instructor ? { label: '生活指導員', value: extendedTrainee.life_instructor } : null,
+                ].filter((item): item is { label: string; value: string } => item !== null)
+              })().map((item, index) => (
+                <div 
+                  key={index} 
+                  className={`px-6 py-4 sm:grid sm:grid-cols-3 sm:gap-4 ${
+                    index % 2 === 0 ? 'bg-white' : 'bg-primary-50'
+                  }`}
+                >
+                  <dt className="text-sm font-medium text-primary-600">{item.label}</dt>
+                  <dd className="mt-1 text-sm text-primary-900 sm:mt-0 sm:col-span-2">
+                    {item.value}
+                  </dd>
+                </div>
+              ))}
+            </div>
+          </Card>
+        ) : null}
+
         {/* 証明書セクション */}
         <Card className="overflow-hidden">
-          <div className="px-6 py-5 bg-primary-50 border-b border-primary-200 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-primary-900">証明書</h3>
+          <div className="px-6 py-5 bg-gradient-to-r from-indigo-600 to-indigo-700 border-b border-indigo-800 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              <h3 className="text-lg font-bold text-white">証明書</h3>
+            </div>
             <Link
               href="/dashboard/certificates"
-              className="text-sm text-primary-600 hover:text-primary-800 font-medium flex items-center space-x-1"
+              className="text-sm text-white hover:text-indigo-100 font-medium flex items-center space-x-1 transition-colors"
             >
               <span>すべて見る</span>
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -289,12 +458,17 @@ export default async function TraineeDetailPage({
 
         {/* スキル評価セクション */}
         <Card className="overflow-hidden">
-          <div className="px-6 py-5 bg-primary-50 border-b border-primary-200 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-primary-900">スキル評価</h3>
+          <div className="px-6 py-5 bg-gradient-to-r from-teal-600 to-teal-700 border-b border-teal-800 flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+              <h3 className="text-lg font-bold text-white">スキル評価</h3>
+            </div>
             <div className="flex items-center space-x-3">
               <Link
                 href={`/dashboard/evaluations/new?traineeId=${resolvedParams.id}`}
-                className="px-3 py-1.5 text-sm text-white bg-primary-600 hover:bg-primary-700 rounded-lg font-medium flex items-center space-x-1 transition-colors"
+                className="px-3 py-1.5 text-sm text-white bg-teal-800 hover:bg-teal-900 rounded-lg font-medium flex items-center space-x-1 transition-colors shadow-sm"
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -303,7 +477,7 @@ export default async function TraineeDetailPage({
               </Link>
               <Link
                 href="/dashboard/evaluations"
-                className="text-sm text-primary-600 hover:text-primary-800 font-medium flex items-center space-x-1"
+                className="text-sm text-white hover:text-teal-100 font-medium flex items-center space-x-1 transition-colors"
               >
                 <span>すべて見る</span>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

@@ -81,15 +81,26 @@ export default async function EvaluationsPage() {
       <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-900">スキル評価一覧</h2>
-          <Link
-            href="/dashboard/evaluations/new"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            <span>新規評価を追加</span>
-          </Link>
+          <div className="flex items-center space-x-3">
+            <Link
+              href="/dashboard/skills"
+              className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center space-x-2"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <span>スキルマスター管理</span>
+            </Link>
+            <Link
+              href="/dashboard/evaluations/new"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <span>新規評価を追加</span>
+            </Link>
+          </div>
         </div>
         <div className="bg-white rounded-xl shadow-md p-6">
           <h2 className="text-lg font-semibold text-gray-900 mb-4">最近の評価</h2>

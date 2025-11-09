@@ -33,6 +33,24 @@ export default function NewTraineePage() {
     address: '',
     emergency_contact: '',
     emergency_phone: '',
+    // 社宅・管理関連情報
+    supervising_organization: '',
+    monthly_rent: '',
+    management_company: '',
+    electric_provider: '',
+    gas_provider: '',
+    water_provider: '',
+    move_in_date: '',
+    batch_period: '',
+    residence_address: '',
+    residence_card_number: '',
+    date_of_birth: '',
+    // 追加項目
+    workplace_manager_name: '',
+    workplace_name: '',
+    area_manager: '',
+    technical_instructor: '',
+    life_instructor: '',
   })
 
   // 組織機能は無効化（登録に組織は不要）
@@ -73,9 +91,15 @@ export default function NewTraineePage() {
         throw new Error('この実習生IDは既に登録されています')
       }
 
+      // 数値フィールドの変換
+      const insertData = {
+        ...formData,
+        monthly_rent: formData.monthly_rent ? parseFloat(formData.monthly_rent) : null,
+      }
+
       const { error: insertError, data: inserted } = await supabase
         .from('trainees')
-        .insert([formData])
+        .insert([insertData])
         .select('id')
         .single()
 
@@ -96,8 +120,9 @@ export default function NewTraineePage() {
 
       router.push('/dashboard/trainees')
       router.refresh()
-    } catch (err: any) {
-      setError(err.message || '登録に失敗しました')
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '登録に失敗しました'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -127,184 +152,544 @@ export default function NewTraineePage() {
         </div>
       </nav>
 
-      <main className="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+      <main className="max-w-5xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <div className="bg-white shadow rounded-lg p-6">
-            {error && (
-              <div className="mb-4 bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded">
+          {error && (
+            <div className="mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg shadow-sm">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
                 {error}
               </div>
-            )}
+            </div>
+          )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    実習生ID <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="trainee_id"
-                    required
-                    value={formData.trainee_id}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* 基本情報セクション */}
+            <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
+              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                <div className="flex items-center space-x-3">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <h2 className="text-xl font-bold text-white">基本情報</h2>
                 </div>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      実習生ID <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="trainee_id"
+                      required
+                      value={formData.trainee_id}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      placeholder="例: TR-2024-001"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    部署 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="department"
-                    required
-                    value={formData.department}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      部署 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="department"
+                      required
+                      value={formData.department}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      placeholder="例: 製造部"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    姓 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="last_name"
-                    required
-                    value={formData.last_name}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      姓 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="last_name"
+                      required
+                      value={formData.last_name}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    名 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="first_name"
-                    required
-                    value={formData.first_name}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      名 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="first_name"
+                      required
+                      value={formData.first_name}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    国籍 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="nationality"
-                    required
-                    value={formData.nationality}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">姓（カナ）</label>
+                    <input
+                      type="text"
+                      name="last_name_kana"
+                      value={formData.last_name_kana}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      placeholder="例: タナカ"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    パスポート番号 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="passport_number"
-                    required
-                    value={formData.passport_number}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">名（カナ）</label>
+                    <input
+                      type="text"
+                      name="first_name_kana"
+                      value={formData.first_name_kana}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      placeholder="例: タロウ"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    ビザ種類 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="visa_type"
-                    required
-                    value={formData.visa_type}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      国籍 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="nationality"
+                      required
+                      value={formData.nationality}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      placeholder="例: ベトナム"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    ビザ有効期限 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="visa_expiry_date"
-                    required
-                    value={formData.visa_expiry_date}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      パスポート番号 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="passport_number"
+                      required
+                      value={formData.passport_number}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    />
+                  </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    入国日 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="entry_date"
-                    required
-                    value={formData.entry_date}
-                    onChange={handleChange}
-                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">写真（任意）</label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const f = e.target.files?.[0] || null
-                      setPhotoFile(f)
-                      if (f) {
-                        const url = URL.createObjectURL(f)
-                        setPhotoPreview(url)
-                      } else {
-                        setPhotoPreview(null)
-                      }
-                    }}
-                    className="mt-1 block w-full"
-                  />
-                  {photoPreview && (
-                    <div className="mt-3">
-                      <img src={photoPreview} alt="プレビュー" className="h-32 w-32 object-cover rounded-md border" />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      ビザ種類 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="visa_type"
+                      required
+                      value={formData.visa_type}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      placeholder="例: 技能実習"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      ビザ有効期限 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      name="visa_expiry_date"
+                      required
+                      value={formData.visa_expiry_date}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      入国日 <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      name="entry_date"
+                      required
+                      value={formData.entry_date}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">役職</label>
+                    <input
+                      type="text"
+                      name="position"
+                      value={formData.position}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      placeholder="例: 技能実習生"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">写真（任意）</label>
+                    <div className="flex items-center space-x-4">
+                      <div className="flex-1">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const f = e.target.files?.[0] || null
+                            setPhotoFile(f)
+                            if (f) {
+                              const url = URL.createObjectURL(f)
+                              setPhotoPreview(url)
+                            } else {
+                              setPhotoPreview(null)
+                            }
+                          }}
+                          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                        />
+                      </div>
+                      {photoPreview && (
+                        <div className="flex-shrink-0">
+                          <img src={photoPreview} alt="プレビュー" className="h-24 w-24 object-cover rounded-lg border-2 border-gray-200 shadow-sm" />
+                        </div>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
+            </div>
 
-              <div className="flex justify-end space-x-3">
-                <Link
-                  href="/dashboard/trainees"
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  キャンセル
-                </Link>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                >
-                  {loading ? '登録中...' : '登録'}
-                </button>
+            {/* 連絡先情報セクション */}
+            <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
+              <div className="bg-gradient-to-r from-green-600 to-green-700 px-6 py-4">
+                <div className="flex items-center space-x-3">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                  </svg>
+                  <h2 className="text-xl font-bold text-white">連絡先情報</h2>
+                </div>
               </div>
-            </form>
-          </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">電話番号</label>
+                    <input
+                      type="tel"
+                      name="phone_number"
+                      value={formData.phone_number}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      placeholder="例: 090-1234-5678"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">メールアドレス</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      placeholder="例: example@email.com"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">住所</label>
+                    <input
+                      type="text"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                      placeholder="例: 東京都渋谷区..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">緊急連絡先（氏名）</label>
+                    <input
+                      type="text"
+                      name="emergency_contact"
+                      value={formData.emergency_contact}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">緊急連絡先（電話番号）</label>
+                    <input
+                      type="tel"
+                      name="emergency_phone"
+                      value={formData.emergency_phone}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 社宅・管理関連情報セクション */}
+            <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
+              <div className="bg-gradient-to-r from-purple-600 to-purple-700 px-6 py-4">
+                <div className="flex items-center space-x-3">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                  <h2 className="text-xl font-bold text-white">社宅・管理関連情報</h2>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">管理団体</label>
+                    <input
+                      type="text"
+                      name="supervising_organization"
+                      value={formData.supervising_organization}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      placeholder="例: ○○監理団体"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">家賃（円）</label>
+                    <input
+                      type="number"
+                      name="monthly_rent"
+                      value={formData.monthly_rent}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      placeholder="例: 50000"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">管理会社</label>
+                    <input
+                      type="text"
+                      name="management_company"
+                      value={formData.management_company}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">入寮日（入社日）</label>
+                    <input
+                      type="date"
+                      name="move_in_date"
+                      value={formData.move_in_date}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">在留カード番号</label>
+                    <input
+                      type="text"
+                      name="residence_card_number"
+                      value={formData.residence_card_number}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">社宅住所</label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="text"
+                        name="residence_address"
+                        value={formData.residence_address}
+                        onChange={handleChange}
+                        className="flex-1 border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                        placeholder="例: 東京都渋谷区..."
+                      />
+                      {formData.residence_address && (
+                        <a
+                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(formData.residence_address)}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2.5 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700 transition-colors flex items-center space-x-1 whitespace-nowrap shadow-sm"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                          </svg>
+                          <span>地図</span>
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">電気契約先</label>
+                    <input
+                      type="text"
+                      name="electric_provider"
+                      value={formData.electric_provider}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      placeholder="例: 東京電力"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">ガス契約先</label>
+                    <input
+                      type="text"
+                      name="gas_provider"
+                      value={formData.gas_provider}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      placeholder="例: 東京ガス"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">水道契約先</label>
+                    <input
+                      type="text"
+                      name="water_provider"
+                      value={formData.water_provider}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      placeholder="例: 東京都水道局"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">期</label>
+                    <input
+                      type="text"
+                      name="batch_period"
+                      value={formData.batch_period}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      placeholder="例: 第1期"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">生年月日</label>
+                    <input
+                      type="date"
+                      name="date_of_birth"
+                      value={formData.date_of_birth}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 事業所・指導員関連情報セクション */}
+            <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
+              <div className="bg-gradient-to-r from-orange-600 to-orange-700 px-6 py-4">
+                <div className="flex items-center space-x-3">
+                  <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  <h2 className="text-xl font-bold text-white">事業所・指導員関連情報</h2>
+                </div>
+              </div>
+              <div className="p-6">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">事業所責任者名</label>
+                    <input
+                      type="text"
+                      name="workplace_manager_name"
+                      value={formData.workplace_manager_name}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">勤務事業所</label>
+                    <input
+                      type="text"
+                      name="workplace_name"
+                      value={formData.workplace_name}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">担当エリアマネージャー</label>
+                    <input
+                      type="text"
+                      name="area_manager"
+                      value={formData.area_manager}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">技能実習指導員</label>
+                    <input
+                      type="text"
+                      name="technical_instructor"
+                      value={formData.technical_instructor}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">生活指導員</label>
+                    <input
+                      type="text"
+                      name="life_instructor"
+                      value={formData.life_instructor}
+                      onChange={handleChange}
+                      className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 送信ボタン */}
+            <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
+              <Link
+                href="/dashboard/trainees"
+                className="px-6 py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors shadow-sm"
+              >
+                キャンセル
+              </Link>
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
+              >
+                {loading ? (
+                  <>
+                    <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>登録中...</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>登録する</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
         </div>
       </main>
     </div>
