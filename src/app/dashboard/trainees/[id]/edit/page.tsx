@@ -177,16 +177,58 @@ export default function EditTraineePage() {
     setSaving(true)
     setError(null)
     try {
-      // 数値フィールドの変換
-      const updateData = {
-        ...formData,
+      // 数値フィールドの変換と、空文字列をnullに変換
+      const updateData: any = {
+        trainee_id: formData.trainee_id,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        first_name_kana: formData.first_name_kana || null,
+        last_name_kana: formData.last_name_kana || null,
+        nationality: formData.nationality,
+        passport_number: formData.passport_number,
+        visa_type: formData.visa_type,
+        visa_expiry_date: formData.visa_expiry_date,
+        entry_date: formData.entry_date,
+        department: formData.department,
+        position: formData.position || null,
+        phone_number: formData.phone_number || null,
+        email: formData.email || null,
+        address: formData.address || null,
+        emergency_contact: formData.emergency_contact || null,
+        emergency_phone: formData.emergency_phone || null,
+        // 社宅・管理関連情報（空文字列の場合はnullに変換）
+        supervising_organization: formData.supervising_organization || null,
         monthly_rent: formData.monthly_rent ? parseFloat(formData.monthly_rent) : null,
+        management_company: formData.management_company || null,
+        electric_provider: formData.electric_provider || null,
+        gas_provider: formData.gas_provider || null,
+        water_provider: formData.water_provider || null,
+        move_in_date: formData.move_in_date || null,
+        batch_period: formData.batch_period || null,
+        residence_address: formData.residence_address || null,
+        residence_card_number: formData.residence_card_number || null,
+        date_of_birth: formData.date_of_birth || null,
+        // 事業所・指導員関連情報
+        workplace_manager_name: formData.workplace_manager_name || null,
+        workplace_name: formData.workplace_name || null,
+        area_manager: formData.area_manager || null,
+        technical_instructor: formData.technical_instructor || null,
+        life_instructor: formData.life_instructor || null,
       }
       const { error: updateError } = await supabase
         .from('trainees')
         .update(updateData)
         .eq('id', traineeId)
-      if (updateError) throw updateError
+      if (updateError) {
+        // スキーマエラーの場合は、より詳細なエラーメッセージを表示
+        if (updateError.message?.includes('batch_period') || updateError.message?.includes('column')) {
+          console.error('スキーマエラー:', updateError.message)
+          console.error('データベースにカラムが存在しない可能性があります。')
+          console.error('docs/fix-batch-period-column.sql を実行してください。')
+          throw new Error(`データベースエラー: ${updateError.message}\n\n解決方法: Supabaseダッシュボードで docs/fix-batch-period-column.sql を実行してください。`)
+        }
+        throw updateError
+      }
 
       // 写真更新
       if (photoFile) {
@@ -226,7 +268,7 @@ export default function EditTraineePage() {
 
       <main className="max-w-5xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          {error && (
+            {error && (
             <div className="mb-6 bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg shadow-sm">
               <div className="flex items-center">
                 <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
@@ -234,16 +276,16 @@ export default function EditTraineePage() {
                 </svg>
                 {error}
               </div>
-            </div>
-          )}
+              </div>
+            )}
 
-          {loading ? (
+            {loading ? (
             <div className="bg-white shadow-lg rounded-xl p-12 text-center">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
               <p className="mt-4 text-gray-600">読み込み中...</p>
             </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-6">
               {/* 基本情報セクション */}
               <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
                 <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
@@ -255,44 +297,44 @@ export default function EditTraineePage() {
                   </div>
                 </div>
                 <div className="p-6">
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    <div>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">実習生ID</label>
-                      <input
-                        type="text"
-                        name="trainee_id"
-                        value={formData.trainee_id}
-                        onChange={handleChange}
+                    <input
+                      type="text"
+                      name="trainee_id"
+                      value={formData.trainee_id}
+                      onChange={handleChange}
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-                    <div>
+                    />
+                  </div>
+                  <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">部署</label>
-                      <input
-                        type="text"
-                        name="department"
-                        value={formData.department}
-                        onChange={handleChange}
+                    <input
+                      type="text"
+                      name="department"
+                      value={formData.department}
+                      onChange={handleChange}
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-                    <div>
+                    />
+                  </div>
+                  <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">姓</label>
-                      <input
-                        type="text"
-                        name="last_name"
-                        value={formData.last_name}
-                        onChange={handleChange}
+                    <input
+                      type="text"
+                      name="last_name"
+                      value={formData.last_name}
+                      onChange={handleChange}
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-                    <div>
+                    />
+                  </div>
+                  <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">名</label>
-                      <input
-                        type="text"
-                        name="first_name"
-                        value={formData.first_name}
-                        onChange={handleChange}
+                    <input
+                      type="text"
+                      name="first_name"
+                      value={formData.first_name}
+                      onChange={handleChange}
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
                       />
                     </div>
@@ -314,59 +356,59 @@ export default function EditTraineePage() {
                         value={formData.first_name_kana}
                         onChange={handleChange}
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-                    <div>
+                    />
+                  </div>
+                  <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">国籍</label>
-                      <input
-                        type="text"
-                        name="nationality"
-                        value={formData.nationality}
-                        onChange={handleChange}
+                    <input
+                      type="text"
+                      name="nationality"
+                      value={formData.nationality}
+                      onChange={handleChange}
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-                    <div>
+                    />
+                  </div>
+                  <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">パスポート番号</label>
-                      <input
-                        type="text"
-                        name="passport_number"
-                        value={formData.passport_number}
-                        onChange={handleChange}
+                    <input
+                      type="text"
+                      name="passport_number"
+                      value={formData.passport_number}
+                      onChange={handleChange}
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-                    <div>
+                    />
+                  </div>
+                  <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">ビザ種類</label>
-                      <input
-                        type="text"
-                        name="visa_type"
-                        value={formData.visa_type}
-                        onChange={handleChange}
+                    <input
+                      type="text"
+                      name="visa_type"
+                      value={formData.visa_type}
+                      onChange={handleChange}
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-                    <div>
+                    />
+                  </div>
+                  <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">ビザ有効期限</label>
-                      <input
-                        type="date"
-                        name="visa_expiry_date"
-                        value={formData.visa_expiry_date}
-                        onChange={handleChange}
+                    <input
+                      type="date"
+                      name="visa_expiry_date"
+                      value={formData.visa_expiry_date}
+                      onChange={handleChange}
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-                    <div>
+                    />
+                  </div>
+                  <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">入国日</label>
-                      <input
-                        type="date"
-                        name="entry_date"
-                        value={formData.entry_date}
-                        onChange={handleChange}
+                    <input
+                      type="date"
+                      name="entry_date"
+                      value={formData.entry_date}
+                      onChange={handleChange}
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                      />
-                    </div>
-                    <div>
+                    />
+                  </div>
+                  <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">役職</label>
                       <input
                         type="text"
@@ -380,18 +422,18 @@ export default function EditTraineePage() {
                       <label className="block text-sm font-medium text-gray-700 mb-1">写真</label>
                       <div className="flex items-center space-x-4">
                         <div className="flex-1">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => {
-                              const f = e.target.files?.[0] || null
-                              setPhotoFile(f)
-                              if (f) setPhotoPreview(URL.createObjectURL(f))
-                            }}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0] || null
+                        setPhotoFile(f)
+                        if (f) setPhotoPreview(URL.createObjectURL(f))
+                      }}
                             className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                          />
+                    />
                         </div>
-                        {photoPreview && (
+                    {photoPreview && (
                           <div className="flex-shrink-0">
                             <img src={photoPreview} alt="プレビュー" className="h-24 w-24 object-cover rounded-lg border-2 border-gray-200 shadow-sm" />
                           </div>
@@ -465,8 +507,8 @@ export default function EditTraineePage() {
                       />
                     </div>
                   </div>
+                  </div>
                 </div>
-              </div>
 
               {/* 社宅・管理関連情報セクション */}
               <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200">
@@ -533,11 +575,11 @@ export default function EditTraineePage() {
                     <div className="sm:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">社宅住所</label>
                       <div className="flex items-center space-x-2">
-                        <input
-                          type="text"
-                          name="residence_address"
-                          value={formData.residence_address}
-                          onChange={handleChange}
+                      <input
+                        type="text"
+                        name="residence_address"
+                        value={formData.residence_address}
+                        onChange={handleChange}
                           className="flex-1 border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
                         />
                         {formData.residence_address && (
@@ -671,21 +713,21 @@ export default function EditTraineePage() {
                         className="block w-full border border-gray-300 rounded-lg shadow-sm py-2.5 px-4 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-colors"
                       />
                     </div>
+                    </div>
                   </div>
                 </div>
-              </div>
 
               {/* 送信ボタン */}
               <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                <Link
-                  href={`/dashboard/trainees/${traineeId}`}
+                  <Link
+                    href={`/dashboard/trainees/${traineeId}`}
                   className="px-6 py-3 border-2 border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors shadow-sm"
-                >
-                  キャンセル
-                </Link>
-                <button
-                  type="submit"
-                  disabled={saving}
+                  >
+                    キャンセル
+                  </Link>
+                  <button
+                    type="submit"
+                    disabled={saving}
                   className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-medium hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl flex items-center space-x-2"
                 >
                   {saving ? (
@@ -704,10 +746,10 @@ export default function EditTraineePage() {
                       <span>更新する</span>
                     </>
                   )}
-                </button>
-              </div>
-            </form>
-          )}
+                  </button>
+                </div>
+              </form>
+            )}
         </div>
       </main>
     </div>

@@ -91,10 +91,43 @@ export default function NewTraineePage() {
         throw new Error('この実習生IDは既に登録されています')
       }
 
-      // 数値フィールドの変換
-      const insertData = {
-        ...formData,
+      // 数値フィールドの変換と、空文字列をnullに変換
+      const insertData: any = {
+        trainee_id: formData.trainee_id,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        first_name_kana: formData.first_name_kana || null,
+        last_name_kana: formData.last_name_kana || null,
+        nationality: formData.nationality,
+        passport_number: formData.passport_number,
+        visa_type: formData.visa_type,
+        visa_expiry_date: formData.visa_expiry_date,
+        entry_date: formData.entry_date,
+        department: formData.department,
+        position: formData.position || null,
+        phone_number: formData.phone_number || null,
+        email: formData.email || null,
+        address: formData.address || null,
+        emergency_contact: formData.emergency_contact || null,
+        emergency_phone: formData.emergency_phone || null,
+        // 社宅・管理関連情報（空文字列の場合はnullに変換）
+        supervising_organization: formData.supervising_organization || null,
         monthly_rent: formData.monthly_rent ? parseFloat(formData.monthly_rent) : null,
+        management_company: formData.management_company || null,
+        electric_provider: formData.electric_provider || null,
+        gas_provider: formData.gas_provider || null,
+        water_provider: formData.water_provider || null,
+        move_in_date: formData.move_in_date || null,
+        batch_period: formData.batch_period || null,
+        residence_address: formData.residence_address || null,
+        residence_card_number: formData.residence_card_number || null,
+        date_of_birth: formData.date_of_birth || null,
+        // 事業所・指導員関連情報
+        workplace_manager_name: formData.workplace_manager_name || null,
+        workplace_name: formData.workplace_name || null,
+        area_manager: formData.area_manager || null,
+        technical_instructor: formData.technical_instructor || null,
+        life_instructor: formData.life_instructor || null,
       }
 
       const { error: insertError, data: inserted } = await supabase
@@ -103,7 +136,16 @@ export default function NewTraineePage() {
         .select('id')
         .single()
 
-      if (insertError) throw insertError
+      if (insertError) {
+        // スキーマエラーの場合は、より詳細なエラーメッセージを表示
+        if (insertError.message?.includes('batch_period') || insertError.message?.includes('column')) {
+          console.error('スキーマエラー:', insertError.message)
+          console.error('データベースにカラムが存在しない可能性があります。')
+          console.error('docs/fix-batch-period-column.sql を実行してください。')
+          throw new Error(`データベースエラー: ${insertError.message}\n\n解決方法: Supabaseダッシュボードで docs/fix-batch-period-column.sql を実行してください。`)
+        }
+        throw insertError
+      }
 
       const traineeId = inserted?.id
 
