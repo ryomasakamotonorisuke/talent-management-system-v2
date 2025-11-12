@@ -75,7 +75,9 @@ export default async function CertificatesPage() {
                     <div key={c.id} className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
                       <div>
                         <p className="font-medium text-red-900">{c.name}</p>
-                        <p className="text-sm text-red-700">期限切れ: {new Date(c.expiry_date).toLocaleDateString('ja-JP')}</p>
+                        <p className="text-sm text-red-700">
+                          期限切れ: {c.expiry_date ? new Date(c.expiry_date).toLocaleDateString('ja-JP') : '未設定'}
+                        </p>
                       </div>
                       <span className="px-2 py-1 bg-red-500 text-white text-xs rounded-full">期限切れ</span>
                     </div>
@@ -84,7 +86,9 @@ export default async function CertificatesPage() {
                     <div key={c.id} className="flex items-center justify-between p-3 bg-orange-50 border border-orange-200 rounded-lg">
                       <div>
                         <p className="font-medium text-orange-900">{c.name}</p>
-                        <p className="text-sm text-orange-700">期限: {new Date(c.expiry_date).toLocaleDateString('ja-JP')}</p>
+                        <p className="text-sm text-orange-700">
+                          期限: {c.expiry_date ? new Date(c.expiry_date).toLocaleDateString('ja-JP') : '未設定'}
+                        </p>
                       </div>
                       <span className="px-2 py-1 bg-orange-500 text-white text-xs rounded-full">期限間近</span>
                     </div>
