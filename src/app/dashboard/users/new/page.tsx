@@ -27,11 +27,28 @@ export default async function NewUserPage() {
   }
 
   // 組織一覧を取得
-  const { data: orgs = [] } = await supabase
+  let orgs = await supabase
     .from('organizations')
     .select('id, name')
     .eq('is_active', true)
     .order('name')
+
+  // 組織が存在しない場合はデフォルト組織を作成
+  if (!orgs.data || orgs.data.length === 0) {
+    const { data: defaultOrg } = await supabase
+      .from('organizations')
+      .insert([{
+        name: 'デフォルト組織',
+        code: 'DEFAULT',
+        is_active: true
+      }])
+      .select('id, name')
+      .single()
+    
+    if (defaultOrg) {
+      orgs = { data: [defaultOrg], error: null }
+    }
+  }
 
   return (
     <DashboardLayout userEmail={session.user.email}>
@@ -47,7 +64,14 @@ export default async function NewUserPage() {
             <h1 className="text-2xl font-bold text-gray-900">新規ユーザー作成</h1>
             <p className="text-sm text-gray-600 mt-2">システムに新しいユーザーを追加します</p>
           </div>
-          <NewUserForm initialOrgs={orgs || []} />
+          {orgs.data && orgs.data.length > 0 ? (
+            <NewUserForm initialOrgs={orgs.data} />
+          ) : (
+            <div className="bg-yellow-50 border-l-4 border-yellow-500 text-yellow-700 px-4 py-3 rounded-lg">
+              <p className="font-medium">組織が存在しません</p>
+              <p className="text-sm mt-1">組織を作成してからユーザーを作成してください。</p>
+            </div>
+          )}
         </div>
       </div>
     </DashboardLayout>
