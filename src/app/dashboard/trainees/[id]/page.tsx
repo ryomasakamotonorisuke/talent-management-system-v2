@@ -333,17 +333,36 @@ export default async function TraineeDetailPage({
               <h3 className="text-lg font-bold text-white">社宅・管理関連情報</h3>
             </div>
           </div>
+          
+          {/* 社宅情報セクション */}
           <div className="divide-y divide-gray-200">
-            <InfoRow label="管理団体" value={traineeWithResidence.supervising_organization} />
+            <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700">社宅情報</h4>
+            </div>
+            <InfoRow label="社宅住所" value={traineeWithResidence.residence_address} mapsUrl={getGoogleMapsUrl(traineeWithResidence.residence_address || '')} />
+            <InfoRow label="入寮日（入社日）" value={traineeWithResidence.move_in_date} type="date" />
             <InfoRow label="家賃（円）" value={traineeWithResidence.monthly_rent} type="currency" />
             <InfoRow label="管理会社" value={traineeWithResidence.management_company} />
-            <InfoRow label="入寮日（入社日）" value={traineeWithResidence.move_in_date} type="date" />
-            <InfoRow label="在留カード番号" value={traineeWithResidence.residence_card_number} />
-            <InfoRow label="社宅住所" value={traineeWithResidence.residence_address} mapsUrl={getGoogleMapsUrl(traineeWithResidence.residence_address || '')} />
+          </div>
+
+          {/* ライフライン契約情報セクション */}
+          <div className="divide-y divide-gray-200">
+            <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700">ライフライン契約情報</h4>
+            </div>
             <InfoRow label="電気契約先" value={traineeWithResidence.electric_provider} />
             <InfoRow label="ガス契約先" value={traineeWithResidence.gas_provider} />
             <InfoRow label="水道契約先" value={traineeWithResidence.water_provider} />
+          </div>
+
+          {/* 管理・その他情報セクション */}
+          <div className="divide-y divide-gray-200">
+            <div className="px-6 py-3 bg-gray-50 border-b border-gray-200">
+              <h4 className="text-sm font-semibold text-gray-700">管理・その他情報</h4>
+            </div>
+            <InfoRow label="管理団体" value={traineeWithResidence.supervising_organization} />
             <InfoRow label="期" value={traineeWithResidence.batch_period} />
+            <InfoRow label="在留カード番号" value={traineeWithResidence.residence_card_number} />
             <InfoRow label="生年月日" value={traineeWithResidence.date_of_birth} type="date" />
           </div>
         </Card>
