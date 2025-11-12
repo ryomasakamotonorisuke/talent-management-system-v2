@@ -66,7 +66,18 @@ function NewEvaluationForm() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('ログイン情報が取得できませんでした')
 
-      const { error: insertError } = await supabase.from('evaluations').insert({
+      // usersテーブルに現在のユーザーが存在するか確認
+      const { data: userRecord } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+      if (!userRecord) {
+        throw new Error('ユーザー情報がusersテーブルに登録されていません。管理者に連絡してください。')
+      }
+
+      const { error: insertError, data: insertedData } = await supabase.from('evaluations').insert({
         trainee_id: traineeId,
         evaluator_id: user.id,
         skill_id: skillId,
@@ -74,9 +85,22 @@ function NewEvaluationForm() {
         period,
         comment: comment || null,
         evaluation_date: evaluationDate || new Date().toISOString().split('T')[0],
-      })
+      }).select()
 
-      if (insertError) throw insertError
+      if (insertError) {
+        // より詳細なエラーメッセージを表示
+        console.error('評価登録エラー:', insertError)
+        if (insertError.message?.includes('violates row-level security')) {
+          throw new Error('評価の登録権限がありません。RLSポリシーを確認してください。')
+        }
+        if (insertError.message?.includes('foreign key')) {
+          throw new Error('実習生、スキル、またはユーザー情報が見つかりません。')
+        }
+        if (insertError.message?.includes('unique constraint')) {
+          throw new Error('同じ実習生・スキル・期間・評価者の組み合わせで既に評価が登録されています。')
+        }
+        throw new Error(`評価の登録に失敗しました: ${insertError.message}`)
+      }
 
       router.push('/dashboard/evaluations')
       router.refresh()
