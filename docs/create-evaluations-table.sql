@@ -83,27 +83,30 @@ CREATE POLICY "Evaluations evaluator update" ON evaluations
   USING (evaluator_id = auth.uid())
   WITH CHECK (evaluator_id = auth.uid());
 
--- 組織ベースのアクセス制御（オプション）
-CREATE POLICY "Evaluations org scoped" ON evaluations
-  FOR ALL 
-  USING (
-    EXISTS (
-      SELECT 1
-      FROM trainees t
-      JOIN user_organizations uo ON uo.organization_id = t.organization_id
-      WHERE t.id = evaluations.trainee_id
-        AND uo.user_id = auth.uid()
-    )
-  )
-  WITH CHECK (
-    EXISTS (
-      SELECT 1
-      FROM trainees t
-      JOIN user_organizations uo ON uo.organization_id = t.organization_id
-      WHERE t.id = evaluations.trainee_id
-        AND uo.user_id = auth.uid()
-    )
-  );
+-- 組織ベースのアクセス制御（オプション - user_organizationsテーブルが存在する場合のみ有効）
+-- 注意: user_organizationsテーブルが存在しない場合は、このポリシーはエラーになります
+-- その場合は、このポリシーをコメントアウトするか、user_organizationsテーブルを作成してください
+-- 
+-- CREATE POLICY "Evaluations org scoped" ON evaluations
+--   FOR ALL 
+--   USING (
+--     EXISTS (
+--       SELECT 1
+--       FROM trainees t
+--       JOIN user_organizations uo ON uo.organization_id = t.organization_id
+--       WHERE t.id = evaluations.trainee_id
+--         AND uo.user_id = auth.uid()
+--     )
+--   )
+--   WITH CHECK (
+--     EXISTS (
+--       SELECT 1
+--       FROM trainees t
+--       JOIN user_organizations uo ON uo.organization_id = t.organization_id
+--       WHERE t.id = evaluations.trainee_id
+--         AND uo.user_id = auth.uid()
+--     )
+--   );
 
 -- ============================================
 -- 確認: テーブルが作成されたことを確認
