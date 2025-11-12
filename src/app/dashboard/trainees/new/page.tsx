@@ -91,8 +91,37 @@ export default function NewTraineePage() {
         throw new Error('この実習生IDは既に登録されています')
       }
 
+      // デフォルト組織を取得（存在しない場合は作成）
+      let defaultOrgId: string | null = null
+      const { data: defaultOrg } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('code', 'DEFAULT')
+        .single()
+
+      if (defaultOrg?.id) {
+        defaultOrgId = defaultOrg.id
+      } else {
+        // デフォルト組織が存在しない場合は作成
+        const { data: newOrg, error: orgError } = await supabase
+          .from('organizations')
+          .insert([{
+            name: 'デフォルト組織',
+            code: 'DEFAULT',
+            is_active: true
+          }])
+          .select('id')
+          .single()
+
+        if (orgError || !newOrg?.id) {
+          throw new Error('組織の作成に失敗しました。管理者に連絡してください。')
+        }
+        defaultOrgId = newOrg.id
+      }
+
       // 数値フィールドの変換と、空文字列をnullに変換
       const insertData: any = {
+        organization_id: defaultOrgId,
         trainee_id: formData.trainee_id,
         first_name: formData.first_name,
         last_name: formData.last_name,
@@ -138,6 +167,10 @@ export default function NewTraineePage() {
 
       if (insertError) {
         // スキーマエラーの場合は、より詳細なエラーメッセージを表示
+        if (insertError.message?.includes('organization_id')) {
+          console.error('organization_idエラー:', insertError.message)
+          throw new Error(`データベースエラー: ${insertError.message}\n\n解決方法: Supabaseダッシュボードで docs/fix-organization-id-constraint.sql を実行してください。`)
+        }
         if (insertError.message?.includes('batch_period') || insertError.message?.includes('column')) {
           console.error('スキーマエラー:', insertError.message)
           console.error('データベースにカラムが存在しない可能性があります。')

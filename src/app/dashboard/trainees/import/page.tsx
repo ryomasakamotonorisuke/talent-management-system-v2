@@ -29,10 +29,39 @@ export default function TraineeImportPage() {
     setLoading(true)
     setMessage(null)
     try {
+      // デフォルト組織を取得（存在しない場合は作成）
+      let defaultOrgId: string | null = null
+      const { data: defaultOrg } = await supabase
+        .from('organizations')
+        .select('id')
+        .eq('code', 'DEFAULT')
+        .single()
+
+      if (defaultOrg?.id) {
+        defaultOrgId = defaultOrg.id
+      } else {
+        // デフォルト組織が存在しない場合は作成
+        const { data: newOrg, error: orgError } = await supabase
+          .from('organizations')
+          .insert([{
+            name: 'デフォルト組織',
+            code: 'DEFAULT',
+            is_active: true
+          }])
+          .select('id')
+          .single()
+
+        if (orgError || !newOrg?.id) {
+          throw new Error('組織の作成に失敗しました。管理者に連絡してください。')
+        }
+        defaultOrgId = newOrg.id
+      }
+
       const text = await file.text()
       const rows = await parseCsv(text)
       // 最低限の項目名想定: trainee_id,last_name,first_name,nationality,passport_number,visa_type,visa_expiry_date,entry_date,department
       const payload = rows.map((r: any) => ({
+        organization_id: defaultOrgId,
         trainee_id: r.trainee_id,
         last_name: r.last_name,
         first_name: r.first_name,
@@ -44,7 +73,7 @@ export default function TraineeImportPage() {
         department: r.department,
         is_active: true,
       }))
-      // まとめて挿入（organization_idはRLSの都合上、クライアントからは直接制御できない場合があるため、既定のトリガーor後続で更新が必要）
+      // まとめて挿入
       const { error } = await supabase.from('trainees').insert(payload)
       if (error) throw error
       setMessage(`インポートに成功しました（${payload.length}件）`)
