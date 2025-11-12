@@ -106,6 +106,17 @@ export default async function TraineeDetailPage({
     notFound()
   }
 
+  // 現在のユーザー情報を取得（実習生ユーザーの場合、自分の実習生データを編集できるようにする）
+  const { data: currentUser } = await supabase
+    .from('users')
+    .select('role, trainee_id')
+    .eq('id', session.user.id)
+    .single()
+
+  // 実習生ユーザーが自分の実習生データを編集できるかチェック
+  const canEdit = currentUser?.role === 'ADMIN' || 
+                  (currentUser?.role === 'TRAINEE' && currentUser?.trainee_id === resolvedParams.id)
+
   // 顔写真の公開URL
   let photoUrl: string | null = null
   if (trainee?.photo) {
@@ -231,12 +242,16 @@ export default async function TraineeDetailPage({
               {trainee.last_name} {trainee.first_name} の詳細
             </h1>
           </div>
-          <div className="flex items-center space-x-3">
-            <Button href={`/dashboard/trainees/${resolvedParams.id}/edit`} variant="primary">
-              編集
-            </Button>
-            <DeleteTraineeButton traineeId={resolvedParams.id} traineeName={`${trainee.last_name} ${trainee.first_name}`} />
-          </div>
+          {canEdit && (
+            <div className="flex items-center space-x-3">
+              <Button href={`/dashboard/trainees/${resolvedParams.id}/edit`} variant="primary">
+                編集
+              </Button>
+              {currentUser?.role === 'ADMIN' && (
+                <DeleteTraineeButton traineeId={resolvedParams.id} traineeName={`${trainee.last_name} ${trainee.first_name}`} />
+              )}
+            </div>
+          )}
         </div>
 
         {/* プロフィールカード */}

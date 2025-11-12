@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { User } from '@/types'
+import LinkTraineeForm from './LinkTraineeForm'
 
 interface UserListProps {
   initialUsers: User[]
@@ -12,6 +13,7 @@ export default function UserList({ initialUsers }: UserListProps) {
   const router = useRouter()
   const [users, setUsers] = useState<User[]>(initialUsers)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [linkingUserId, setLinkingUserId] = useState<string | null>(null)
 
   const handleDelete = async (userId: string, userName: string) => {
     if (!confirm(`本当に「${userName}」を削除しますか？\n\nこの操作は取り消せません。`)) {
@@ -71,6 +73,7 @@ export default function UserList({ initialUsers }: UserListProps) {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ロール</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">部署</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ステータス</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">実習生紐付け</th>
             <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
           </tr>
         </thead>
@@ -102,7 +105,39 @@ export default function UserList({ initialUsers }: UserListProps) {
                   </span>
                 )}
               </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
+              <td className="px-6 py-4 whitespace-nowrap text-sm">
+                {user.role === 'TRAINEE' ? (
+                  <div className="space-y-2">
+                    {linkingUserId === user.id ? (
+                      <LinkTraineeForm
+                        userId={user.id}
+                        currentTraineeId={user.trainee_id || null}
+                        onSuccess={() => {
+                          setLinkingUserId(null)
+                          router.refresh()
+                        }}
+                      />
+                    ) : (
+                      <div className="space-y-1">
+                        {user.trainee_id ? (
+                          <span className="text-xs text-green-600">✓ 紐付け済み</span>
+                        ) : (
+                          <span className="text-xs text-gray-400">未紐付け</span>
+                        )}
+                        <button
+                          onClick={() => setLinkingUserId(user.id)}
+                          className="block text-xs text-blue-600 hover:text-blue-800"
+                        >
+                          紐付けを変更
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-xs text-gray-400">-</span>
+                )}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-right text-sm space-x-2">
                 <button
                   onClick={() => handleDelete(user.id, user.name)}
                   disabled={deletingId === user.id}
@@ -115,7 +150,7 @@ export default function UserList({ initialUsers }: UserListProps) {
           ))}
           {users.length === 0 && (
             <tr>
-              <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+              <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
                 ユーザーがありません
               </td>
             </tr>

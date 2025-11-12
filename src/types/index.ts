@@ -93,6 +93,7 @@ export interface User {
   name: string
   role: UserRole
   department?: string
+  trainee_id?: string | null
   is_active: boolean
   created_at: string
   updated_at: string

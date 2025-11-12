@@ -146,27 +146,51 @@ export default async function DashboardPage() {
               </Card>
 
               {isAdmin && (
-                <Card hover glow className="p-6 group">
-                  <Button
-                    href="/dashboard/users"
-                    variant="ghost"
-                    className="w-full justify-start h-auto p-0"
-                  >
-                    <div className="flex items-center space-x-4 w-full">
-                      <div className="bg-orange-100 rounded-xl p-4 group-hover:bg-orange-200 transition-colors duration-300">
-                        <svg className="w-8 h-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
+                <>
+                  <Card hover glow className="p-6 group border-2 border-red-200 bg-gradient-to-br from-red-50 to-orange-50">
+                    <Button
+                      href="/dashboard/admin"
+                      variant="ghost"
+                      className="w-full justify-start h-auto p-0"
+                    >
+                      <div className="flex items-center space-x-4 w-full">
+                        <div className="bg-red-100 rounded-xl p-4 group-hover:bg-red-200 transition-colors duration-300">
+                          <svg className="w-8 h-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-primary-900 group-hover:text-red-600 transition-colors">
+                            管理画面
+                          </h3>
+                          <p className="text-sm text-primary-500 mt-1">組織編制・ユーザー編制</p>
+                        </div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-primary-900 group-hover:text-orange-600 transition-colors">
-                          ユーザー管理
-                        </h3>
-                        <p className="text-sm text-primary-500 mt-1">ユーザー作成・削除・管理</p>
+                    </Button>
+                  </Card>
+                  <Card hover glow className="p-6 group">
+                    <Button
+                      href="/dashboard/users"
+                      variant="ghost"
+                      className="w-full justify-start h-auto p-0"
+                    >
+                      <div className="flex items-center space-x-4 w-full">
+                        <div className="bg-orange-100 rounded-xl p-4 group-hover:bg-orange-200 transition-colors duration-300">
+                          <svg className="w-8 h-8 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-primary-900 group-hover:text-orange-600 transition-colors">
+                            ユーザー管理
+                          </h3>
+                          <p className="text-sm text-primary-500 mt-1">ユーザー作成・削除・管理</p>
+                        </div>
                       </div>
-                    </div>
-                  </Button>
-                </Card>
+                    </Button>
+                  </Card>
+                </>
               )}
             </div>
           </div>

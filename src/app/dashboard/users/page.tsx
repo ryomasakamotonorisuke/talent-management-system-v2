@@ -28,7 +28,7 @@ export default async function UsersPage() {
     redirect('/dashboard')
   }
 
-  // ユーザー一覧を取得
+  // ユーザー一覧を取得（trainee_idを含む）
   const { data: users = [], error } = await supabase
     .from('users')
     .select('*')

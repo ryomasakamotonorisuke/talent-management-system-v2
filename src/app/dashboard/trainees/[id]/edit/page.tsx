@@ -60,6 +60,26 @@ export default function EditTraineePage() {
       try {
         setLoading(true)
         setError(null)
+
+        // 現在のユーザー情報を取得
+        const { data: { session } } = await supabase.auth.getSession()
+        if (!session) {
+          router.push('/login')
+          return
+        }
+
+        // ユーザーのロールとtrainee_idを取得
+        const { data: currentUser } = await supabase
+          .from('users')
+          .select('role, trainee_id')
+          .eq('id', session.user.id)
+          .single()
+
+        // 実習生ユーザーの場合、自分の実習生データのみ編集可能
+        if (currentUser?.role === 'TRAINEE' && currentUser?.trainee_id !== traineeId) {
+          setError('この実習生データを編集する権限がありません。')
+          return
+        }
         // 明示的にカラムを指定して取得（スキーマキャッシュの問題を回避）
         const { data, error } = await supabase
           .from('trainees')
