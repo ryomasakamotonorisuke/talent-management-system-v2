@@ -68,7 +68,7 @@ export default function NewOrganizationForm() {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
             placeholder="例: 株式会社サンプル"
           />
@@ -81,7 +81,7 @@ export default function NewOrganizationForm() {
             type="text"
             value={code}
             onChange={(e) => setCode(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="例: SAMPLE"
           />
           <p className="text-xs text-gray-500 mt-1">組織を識別するためのコード（英数字推奨）</p>

@@ -77,7 +77,7 @@ export default function NewUserForm({ initialOrgs }: NewUserFormProps) {
           <select
             value={organizationId}
             onChange={(e) => setOrganizationId(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
           >
             <option value="">選択してください</option>
@@ -92,7 +92,7 @@ export default function NewUserForm({ initialOrgs }: NewUserFormProps) {
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="山田 太郎"
           />
         </div>
@@ -102,7 +102,7 @@ export default function NewUserForm({ initialOrgs }: NewUserFormProps) {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
             placeholder="user@example.com"
           />
@@ -113,7 +113,7 @@ export default function NewUserForm({ initialOrgs }: NewUserFormProps) {
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
             placeholder="8文字以上"
             minLength={8}
@@ -125,7 +125,7 @@ export default function NewUserForm({ initialOrgs }: NewUserFormProps) {
           <select
             value={role}
             onChange={(e) => setRole(e.target.value as any)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             required
           >
             <option value="ADMIN">管理部署（フルアクセス）</option>
@@ -139,7 +139,7 @@ export default function NewUserForm({ initialOrgs }: NewUserFormProps) {
             type="text"
             value={department}
             onChange={(e) => setDepartment(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             placeholder="製造部 など"
           />
         </div>
