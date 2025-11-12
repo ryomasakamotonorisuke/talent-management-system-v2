@@ -50,6 +50,64 @@ export default function LoginPage() {
       }
 
       if (data.user) {
+        // usersテーブルにユーザーが存在するか確認し、存在しない場合は作成
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('id')
+          .eq('id', data.user.id)
+          .single()
+
+        if (!existingUser) {
+          // デフォルト組織を取得
+          const { data: defaultOrg } = await supabase
+            .from('organizations')
+            .select('id')
+            .eq('code', 'DEFAULT')
+            .single()
+
+          let defaultOrgId: string | null = null
+          if (defaultOrg?.id) {
+            defaultOrgId = defaultOrg.id
+          } else {
+            // デフォルト組織が存在しない場合は作成
+            const { data: newOrg } = await supabase
+              .from('organizations')
+              .insert([{
+                name: 'デフォルト組織',
+                code: 'DEFAULT',
+                is_active: true
+              }])
+              .select('id')
+              .single()
+            defaultOrgId = newOrg?.id || null
+          }
+
+          // usersテーブルにユーザーを追加
+          const { error: insertError } = await supabase
+            .from('users')
+            .insert([{
+              id: data.user.id,
+              email: data.user.email || email,
+              name: data.user.user_metadata?.name || data.user.email?.split('@')[0] || 'ユーザー',
+              role: 'ADMIN', // デフォルトでADMINロールを設定
+              is_active: true,
+            }])
+
+          if (insertError && !insertError.message?.includes('duplicate key')) {
+            console.error('Failed to create user record:', insertError)
+            // エラーをログに記録するが、ログインは続行
+          } else if (defaultOrgId) {
+            // user_organizationsテーブルに紐付け（エラーは無視）
+            await supabase
+              .from('user_organizations')
+              .insert([{
+                user_id: data.user.id,
+                organization_id: defaultOrgId,
+                role: 'ADMIN',
+              }])
+          }
+        }
+
         router.push('/dashboard')
         router.refresh()
       }
