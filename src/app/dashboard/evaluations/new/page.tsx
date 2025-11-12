@@ -2,7 +2,10 @@
 
 import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import Link from 'next/link'
+import DashboardLayout from '@/components/layout/DashboardLayout'
+import Card from '@/components/ui/Card'
+import Button from '@/components/ui/Button'
+import Input from '@/components/ui/Input'
 import { createSupabaseClient } from '@/lib/supabase/client'
 
 function NewEvaluationForm() {
@@ -10,6 +13,7 @@ function NewEvaluationForm() {
   const searchParams = useSearchParams()
   const supabase = createSupabaseClient()
 
+  const [userEmail, setUserEmail] = useState<string | undefined>(undefined)
   const [trainees, setTrainees] = useState<Array<{ id: string; trainee_id: string; first_name: string; last_name: string }>>([])
   const [skills, setSkills] = useState<Array<{ id: string; name: string; category: string }>>([])
   const [traineeId, setTraineeId] = useState('')
@@ -23,6 +27,12 @@ function NewEvaluationForm() {
 
   useEffect(() => {
     const fetchData = async () => {
+      // ユーザー情報を取得
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.email) {
+        setUserEmail(user.email)
+      }
+
       // 実習生一覧を取得
       const { data: traineesData } = await supabase
         .from('trainees')
@@ -113,156 +123,185 @@ function NewEvaluationForm() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 py-8 px-4">
-      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">スキル評価の追加</h1>
-          <Link href="/dashboard/evaluations" className="text-blue-600 hover:text-blue-800 text-sm">一覧へ戻る</Link>
-        </div>
-        {error && (
-          <div className="mb-4 bg-red-50 border-l-4 border-red-500 text-red-700 px-4 py-3 rounded-lg">{error}</div>
-        )}
-        <form onSubmit={handleSubmit} className="space-y-5">
+    <DashboardLayout userEmail={userEmail}>
+      <div className="space-y-6 animate-fade-in">
+        {/* ヘッダー */}
+        <div className="flex items-center justify-between">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">対象実習生</label>
-            <select
-              value={traineeId}
-              onChange={(e) => setTraineeId(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-              required
-            >
-              <option value="">選択してください</option>
-              {trainees.map(t => (
-                <option key={t.id} value={t.id}>
-                  {t.last_name} {t.first_name} (ID: {t.trainee_id})
-                </option>
-              ))}
-            </select>
+            <Button href="/dashboard/evaluations" variant="ghost" size="sm">
+              ← スキル評価に戻る
+            </Button>
+            <h1 className="text-4xl font-bold gradient-text mt-2">スキル評価の追加</h1>
+            <p className="text-primary-600 mt-2">実習生のスキル評価を登録します</p>
           </div>
+        </div>
 
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <label className="block text-sm font-medium text-gray-700">スキル</label>
-              {skills.length === 0 && (
-                <Link
-                  href="/dashboard/skills/new"
-                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  スキルを登録 →
-                </Link>
-              )}
-            </div>
-            {skills.length === 0 ? (
-              <div className="w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 text-center">
-                <p className="text-sm text-gray-600 mb-2">スキルマスターが登録されていません</p>
-                <Link
-                  href="/dashboard/skills/new"
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-                >
-                  スキルマスターを登録する
-                </Link>
-              </div>
-            ) : (
+        {/* エラー表示 */}
+        {error && (
+          <Card className="p-4 bg-red-50 border-red-200">
+            <p className="text-red-700 font-medium">{error}</p>
+          </Card>
+        )}
+
+        {/* フォーム */}
+        <Card className="p-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                対象実習生 <span className="text-red-500">*</span>
+              </label>
               <select
-                value={skillId}
-                onChange={(e) => setSkillId(e.target.value)}
+                value={traineeId}
+                onChange={(e) => setTraineeId(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
                 required
               >
                 <option value="">選択してください</option>
-                {skills.map(skill => (
-                  <option key={skill.id} value={skill.id}>
-                    {skill.name} ({skill.category})
+                {trainees.map(t => (
+                  <option key={t.id} value={t.id}>
+                    {t.last_name} {t.first_name} (ID: {t.trainee_id})
                   </option>
                 ))}
               </select>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">評価レベル (1〜5)</label>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                {[1, 2, 3, 4, 5].map((l) => (
-                  <button
-                    key={l}
-                    type="button"
-                    onClick={() => setLevel(l)}
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
-                      level === l
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                    }`}
-                  >
-                    {l}
-                  </button>
-                ))}
-              </div>
-              <span className="text-sm text-gray-600">レベル {level}/5</span>
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">評価期間</label>
-            <input
-              type="text"
-              value={period}
-              onChange={(e) => setPeriod(e.target.value)}
-              placeholder="例: 2024年4月〜6月"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-              required
-            />
-            <p className="mt-1 text-xs text-gray-500">例: 2024年4月〜6月、2024年度第1四半期 など</p>
-          </div>
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <label className="block text-sm font-medium text-gray-700">
+                  スキル <span className="text-red-500">*</span>
+                </label>
+                {skills.length === 0 && (
+                  <Button
+                    href="/dashboard/skills/new"
+                    variant="ghost"
+                    size="sm"
+                  >
+                    スキルを登録 →
+                  </Button>
+                )}
+              </div>
+              {skills.length === 0 ? (
+                <Card className="p-4 border-2 border-dashed border-gray-300 bg-gray-50">
+                  <div className="text-center">
+                    <p className="text-sm text-gray-600 mb-2">スキルマスターが登録されていません</p>
+                    <Button
+                      href="/dashboard/skills/new"
+                      variant="primary"
+                      size="sm"
+                    >
+                      スキルマスターを登録する
+                    </Button>
+                  </div>
+                </Card>
+              ) : (
+                <select
+                  value={skillId}
+                  onChange={(e) => setSkillId(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                  required
+                >
+                  <option value="">選択してください</option>
+                  {skills.map(skill => (
+                    <option key={skill.id} value={skill.id}>
+                      {skill.name} ({skill.category})
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">評価日</label>
-            <input
-              type="date"
-              value={evaluationDate}
-              onChange={(e) => setEvaluationDate(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-              required
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">評価レベル (1〜5) <span className="text-red-500">*</span></label>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-2">
+                  {[1, 2, 3, 4, 5].map((l) => (
+                    <button
+                      key={l}
+                      type="button"
+                      onClick={() => setLevel(l)}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-colors ${
+                        level === l
+                          ? 'bg-blue-500 text-white shadow-md'
+                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}
+                    >
+                      {l}
+                    </button>
+                  ))}
+                </div>
+                <span className="text-sm font-medium text-gray-900">レベル {level}/5</span>
+              </div>
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">コメント（任意）</label>
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              rows={4}
-              placeholder="評価に関するコメントを入力してください"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                評価期間 <span className="text-red-500">*</span>
+              </label>
+              <Input
+                type="text"
+                value={period}
+                onChange={(e) => setPeriod(e.target.value)}
+                placeholder="例: 2024年4月〜6月"
+                required
+              />
+              <p className="mt-1 text-xs text-gray-500">例: 2024年4月〜6月、2024年度第1四半期 など</p>
+            </div>
 
-          <div>
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 font-medium disabled:opacity-50"
-            >
-              {loading ? '登録中...' : '評価を登録'}
-            </button>
-          </div>
-        </form>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                評価日 <span className="text-red-500">*</span>
+              </label>
+              <Input
+                type="date"
+                value={evaluationDate}
+                onChange={(e) => setEvaluationDate(e.target.value)}
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">コメント（任意）</label>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                rows={4}
+                placeholder="評価に関するコメントを入力してください"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+              />
+            </div>
+
+            <div className="flex items-center space-x-3 pt-4">
+              <Button
+                type="submit"
+                variant="primary"
+                disabled={loading}
+                isLoading={loading}
+              >
+                {loading ? '登録中...' : '評価を登録'}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => router.back()}
+                disabled={loading}
+              >
+                キャンセル
+              </Button>
+            </div>
+          </form>
+        </Card>
       </div>
-    </div>
+    </DashboardLayout>
   )
 }
 
 export default function NewEvaluationPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 py-8 px-4">
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">読み込み中...</p>
-            </div>
-          </div>
+      <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-primary-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">読み込み中...</p>
         </div>
       </div>
     }>
