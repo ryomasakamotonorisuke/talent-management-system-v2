@@ -16,6 +16,17 @@ export default async function SkillsPage() {
     redirect('/login')
   }
 
+  // ロールチェック（ADMINのみアクセス可能）
+  const { data: user } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', session.user.id)
+    .single()
+
+  if (!user || user.role !== 'ADMIN') {
+    redirect('/dashboard')
+  }
+
   // スキルマスター一覧を取得
   const { data: skills, error } = await supabase
     .from('skill_masters')
