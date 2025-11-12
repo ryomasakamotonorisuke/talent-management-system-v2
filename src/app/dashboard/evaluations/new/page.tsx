@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createSupabaseClient } from '@/lib/supabase/client'
 
-export default function NewEvaluationPage() {
+function NewEvaluationForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createSupabaseClient()
@@ -225,6 +225,25 @@ export default function NewEvaluationPage() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function NewEvaluationPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-gray-100 py-8 px-4">
+        <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">読み込み中...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    }>
+      <NewEvaluationForm />
+    </Suspense>
   )
 }
 
